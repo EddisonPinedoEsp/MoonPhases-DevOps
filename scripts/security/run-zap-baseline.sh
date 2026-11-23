@@ -5,7 +5,7 @@
 #
 # Uso: ./scripts/security/run-zap-baseline.sh [url-objetivo] [prefijo-reporte]
 #   frontend (por defecto): ./scripts/security/run-zap-baseline.sh
-#   API:                    ./scripts/security/run-zap-baseline.sh http://frontend:8080/api/notes baseline-api
+#   API:                    ./scripts/security/run-zap-baseline.sh http://frontend:8081/api/notes baseline-api
 #
 # El objetivo se indica con el nombre de servicio de Compose (frontend), porque ZAP corre
 # en un contenedor dentro de la misma red.
@@ -19,7 +19,7 @@
 set -u
 source "$(dirname "${BASH_SOURCE[0]}")/_zap-common.sh"
 
-TARGET="${1:-http://frontend:8080/MoonPhases/}"
+TARGET="${1:-http://frontend:8081/MoonPhases/}"
 PREFIX="${2:-baseline}"
 RULES="$ROOT/zap/rules.conf"
 

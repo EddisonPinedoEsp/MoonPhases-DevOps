@@ -1,0 +1,120 @@
+# DevSecOps pipeline: secretos -> SCA -> SAST -> DefectDojo
+
+name: DevSecOps Pipeline
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: node --version
+      - run: npm ci --ignore-scripts || true
+
+  gitleaks-scan:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks
+        continue-on-error: true
+        run: bash scripts/security/run-gitleaks.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports-gitleaks
+          path: reports/secrets/gitleaks-report.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  trufflehog-scan:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: TruffleHog
+        continue-on-error: true
+        run: bash scripts/security/run-truffleHog.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports-trufflehog
+          path: reports/secrets/trufflehog-report.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  trivy-scan:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Sin lockfile Trivy no detecta dependencias npm
+      - name: Verificar package-lock.json
+        run: test -f package-lock.json || { echo "Falta package-lock.json, no hay SCA"; exit 1; }
+      - name: Trivy
+        continue-on-error: true
+        run: bash scripts/security/run-trivy-fs.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports-trivy
+          path: reports/sca/trivy-report.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  semgrep-scan:
+    needs: [gitleaks-scan, trufflehog-scan]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Semgrep
+        continue-on-error: true
+        run: bash scripts/security/run-semgrep.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports-semgrep
+          path: reports/sast/semgrep-report.json
+          if-no-files-found: warn
+          retention-days: 7
+
+  upload-defectdojo:
+    needs: [gitleaks-scan, trufflehog-scan, trivy-scan, semgrep-scan]
+    if: ${{ always() && vars.DEFECTDOJO_URL != '' }}
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    env:
+      DEFECTDOJO_URL: ${{ vars.DEFECTDOJO_URL }}
+      DEFECTDOJO_PRODUCT_ID: ${{ vars.DEFECTDOJO_PRODUCT_ID }}
+      DEFECTDOJO_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: reports-gitleaks, path: reports/secrets }
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: { name: reports-trufflehog, path: reports/secrets }
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: { name: reports-trivy, path: reports/sca }
+        continue-on-error: true
+      - uses: actions/download-artifact@v4
+        with: { name: reports-semgrep, path: reports/sast }
+        continue-on-error: true
+      - name: Subir hallazgos a DefectDojo
+        run: bash scripts/upload_to_defectdojo.sh

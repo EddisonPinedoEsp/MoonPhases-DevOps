@@ -8,7 +8,7 @@
 set -u
 source "$(dirname "${BASH_SOURCE[0]}")/_zap-common.sh"
 
-TARGET="${1:-http://frontend:8080/MoonPhases/}"
+TARGET="${1:-http://frontend:8081/MoonPhases/}"
 
 require_docker
 require_stack

@@ -19,7 +19,7 @@ if [ $? -eq 0 ]; then
     echo "======================================"
     echo ""
     echo "Frontend:"
-    echo "http://localhost:8080/MoonPhases/"
+    echo "http://localhost:8081/MoonPhases/"
     echo ""
     echo "Backend:"
     echo "http://localhost:3001/api/health"

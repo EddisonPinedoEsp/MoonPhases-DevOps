@@ -46,7 +46,7 @@ services:
     image: moonphases-frontend:1.0.0
     restart: unless-stopped
     ports:
-      - "8080:8080"
+      - "8081:8081"
     networks:
       - public
     depends_on:

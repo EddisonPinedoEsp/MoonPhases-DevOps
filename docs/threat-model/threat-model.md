@@ -48,7 +48,7 @@ flowchart LR
     subgraph TB1 ["Límite TB1 · Internet ↔ host"]
         subgraph HOST ["Host Docker"]
             subgraph PUB ["Red Docker pública (public)"]
-                P1(("P1 · Nginx / frontend<br/>:8080"))
+                P1(("P1 · Nginx / frontend<br/>:8081"))
                 P2(("P2 · Express / backend<br/>:3001"))
             end
             subgraph PRIV ["TB2 · Red Docker privada (private, internal: true)"]
@@ -74,7 +74,7 @@ flowchart LR
     E2["E2 · DefectDojo"]
 
     %% Flujos de la aplicación
-    E1 -->|"F1 HTTP :8080 · S T I"| P1
+    E1 -->|"F1 HTTP :8081 · S T I"| P1
     E1 -.->|"F1b HTTP :3001 directo · S T I D E"| P2
     P1 -->|"F2 proxy /api/ · T D"| P2
     P2 -->|"F3 SQL parametrizado, sin TLS · T I D"| P3
@@ -106,7 +106,7 @@ flowchart LR
 
 | ID | Límite | Cruza | Observación |
 |---|---|---|---|
-| TB1 | Internet ↔ host | F1, F1b | El host expone `8080` (frontend) y `3001` (backend). |
+| TB1 | Internet ↔ host | F1, F1b | El host expone `8081` (frontend) y `3001` (backend). |
 | TB2 | Red pública ↔ red privada | F3 | PostgreSQL solo está en `private` (`internal: true`), y la red `private` no tiene salida a Internet. |
 | TB3 | Contenedores ↔ secret store | F5 | El secreto se monta en `/run/secrets/pg_password`. |
 | TB4 | GitHub ↔ runner | F6, F8 | Entrada de código no confiable (PR, forks). |
@@ -148,7 +148,7 @@ Cada celda contiene los identificadores de amenaza (detallados en la sección 5)
 | **T-05** | T | P2 · F1b | `app.use(cors())` responde `Access-Control-Allow-Origin: *`. Cualquier página web que el usuario visite puede leer y escribir en la API si el navegador puede alcanzarla. | [server.js:6](../../backend/src/server.js) | Confirmada | Media |
 | **R-01** | R | P2 | Las escrituras y borrados no registran quién, cuándo ni desde dónde. No hay logs de auditoría ni identidad. | [server.js:43-74](../../backend/src/server.js) | Confirmada | Media |
 | **I-01** | I | P2 · F1 | Los errores devuelven `err.message` al cliente. Un error de PostgreSQL puede revelar nombres de tabla, columnas y detalles del motor. | [server.js:22](../../backend/src/server.js), [:38](../../backend/src/server.js), [:59](../../backend/src/server.js), [:71](../../backend/src/server.js) | Confirmada | Media |
-| **I-02** | I | P1 · F1 | El tráfico del usuario viaja en HTTP plano en el puerto `8080`. No hay TLS configurado. | [nginx.conf:2](../../frontend/nginx.conf) (`listen 8080`, sin `ssl`) | Confirmada | Media |
+| **I-02** | I | P1 · F1 | El tráfico del usuario viaja en HTTP plano en el puerto `8081`. No hay TLS configurado. | [nginx.conf:2](../../frontend/nginx.conf) (`listen 8081`, sin `ssl`) | Confirmada | Media |
 | **I-03** | I | P2 → P3 · F3 | La conexión a PostgreSQL no usa TLS (`db.js` no define `ssl`). El riesgo está acotado porque la red es interna. | [db.js:15-21](../../backend/src/db.js) | Candidata | Baja |
 | **I-04** | I | DS2 | El volumen `postgres-data` no está cifrado en reposo. Depende del cifrado de disco del host. | [compose.yaml](../../compose.yaml) (volumen local sin cifrado) | Candidata | Baja |
 | **I-05** | I | DS3 | El secreto es un archivo en texto plano (`pg_password.txt`) en el host. Está excluido de Git y no entra en las imágenes, pero sigue siendo legible por cualquiera con acceso al host. | [.gitignore](../../.gitignore), [compose.yaml:56-57](../../compose.yaml) | Mitigada (riesgo residual) | Baja |

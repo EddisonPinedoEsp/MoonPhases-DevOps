@@ -12,7 +12,7 @@ Criterio de priorización: severidad (impacto × probabilidad en el despliegue a
 | **V-02** | S, T, I, D | P2 Express · F1b · amenaza S-02 | El backend publica el puerto `3001` en el host, así que la API es accesible sin pasar por Nginx. | [compose.yaml:26-27](../../compose.yaml) | Evita cualquier control del proxy (límites, cabeceras, futuras reglas de WAF). Expone el backend directamente a Internet. | **Alta** | Eliminar `ports: "3001:3001"` del servicio `backend`. El acceso debe pasar siempre por Nginx. | Corrección inmediata (cambio de una línea) |
 | **V-03** | D | P1 Nginx, P2 Express · F1, F2 · amenaza D-01 | No hay límite de tasa ni de tamaño de peticiones. Nginx usa el valor por defecto de 1 MB, Express acepta hasta 100 KB por defecto, y `content` no tiene longitud máxima. | [nginx.conf](../../frontend/nginx.conf), [server.js:7](../../backend/src/server.js) | Un cliente puede saturar el backend o el volumen de PostgreSQL con peticiones repetidas o notas muy grandes. | **Media** | En Nginx: `limit_req_zone` y `limit_req`, además de `client_max_body_size` explícito. En Express: validar la longitud de `content` (p. ej., 10 000 caracteres). | Fase de correcciones |
 | **V-04** | I | P2 Express · F1 · amenaza I-01 | Los errores devuelven `err.message` al cliente. | [server.js:22](../../backend/src/server.js), [:38](../../backend/src/server.js), [:59](../../backend/src/server.js), [:71](../../backend/src/server.js) | Un error de PostgreSQL puede revelar tablas, columnas y versión del motor. Facilita la explotación posterior. | **Media** | Registrar el error completo en el servidor (`console.error`) y responder con un mensaje genérico (`{"error":"Error interno"}`). | Fase de correcciones |
-| **V-05** | T, I | P1 Nginx, P2 Express · F1, F1b · amenazas T-03, T-05, I-02 | Canal y navegador sin protección: tráfico HTTP sin TLS, CORS abierto (`*`) y ausencia de cabeceras de seguridad. | [nginx.conf:2](../../frontend/nginx.conf), [server.js:6](../../backend/src/server.js) | Un atacante en la red puede leer o modificar el tráfico. Cualquier sitio web visitado por el usuario puede llamar a la API desde su navegador. | **Media** | Terminar TLS en Nginx (certificado en el entorno de despliegue). Restringir CORS al origen del frontend (`cors({ origin: 'http://localhost:8080' })`). Añadir `add_header` con CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` y HSTS. | Fase de correcciones y pruebas DAST |
+| **V-05** | T, I | P1 Nginx, P2 Express · F1, F1b · amenazas T-03, T-05, I-02 | Canal y navegador sin protección: tráfico HTTP sin TLS, CORS abierto (`*`) y ausencia de cabeceras de seguridad. | [nginx.conf:2](../../frontend/nginx.conf), [server.js:6](../../backend/src/server.js) | Un atacante en la red puede leer o modificar el tráfico. Cualquier sitio web visitado por el usuario puede llamar a la API desde su navegador. | **Media** | Terminar TLS en Nginx (certificado en el entorno de despliegue). Restringir CORS al origen del frontend (`cors({ origin: 'http://localhost:8081' })`). Añadir `add_header` con CSP, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` y HSTS. | Fase de correcciones y pruebas DAST |
 
 ## 2. Explicación de cada vulnerabilidad
 
@@ -28,7 +28,7 @@ Es la vulnerabilidad más grave del sistema. Además, sin identidad no es posibl
 
 ### V-02 · Backend expuesto directamente en el host (S, T, I, D)
 
-En [compose.yaml:26-27](../../compose.yaml), el servicio `backend` publica `3001:3001`. El tráfico del usuario debería pasar solo por Nginx (puerto `8080`), que actúa como punto de control: proxy, cabeceras y límites. Con el puerto publicado, un cliente llega a Express sin pasar por ese punto.
+En [compose.yaml:26-27](../../compose.yaml), el servicio `backend` publica `3001:3001`. El tráfico del usuario debería pasar solo por Nginx (puerto `8081`), que actúa como punto de control: proxy, cabeceras y límites. Con el puerto publicado, un cliente llega a Express sin pasar por ese punto.
 
 Este hallazgo es una **violación de límite de confianza** (TB1): el flujo F1b existe, aunque en el diseño no debería. Se corrige eliminando una línea del `compose.yaml`. Es la acción de menor esfuerzo y mayor impacto de este registro.
 
@@ -52,7 +52,7 @@ Es una fuga de **nivel medio**: no da acceso directo, pero reduce el costo de cu
 
 Tres problemas relacionados, agrupados porque se corrigen en los mismos archivos:
 
-1. **HTTP sin TLS (I-02):** `listen 8080` sin `ssl`. Las notas y las credenciales viajan sin cifrar. El riesgo es mayor si el host se usa fuera de una red local.
+1. **HTTP sin TLS (I-02):** `listen 8081` sin `ssl`. Las notas y las credenciales viajan sin cifrar. El riesgo es mayor si el host se usa fuera de una red local.
 2. **CORS abierto (T-05):** `app.use(cors())` equivale a `Access-Control-Allow-Origin: *`. Un sitio malicioso puede hacer que el navegador del usuario envíe `DELETE` o `POST` a la API, o leer sus notas. Es una variante de CSRF favorecida por la falta de autenticación (V-01).
 3. **Cabeceras ausentes (T-03):** sin CSP ni `X-Frame-Options`, el frontend puede embeberse en un `iframe` (*clickjacking*) y no tiene una política que limite la ejecución de scripts.
 

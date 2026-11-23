@@ -50,7 +50,7 @@ Este comando construye las imágenes del frontend y backend, inicia PostgreSQL y
 La aplicación estará disponible en:
 
 ```text
-http://localhost:8080/MoonPhases/
+http://localhost:8081/MoonPhases/
 ```
 
 El backend también publica su comprobación de salud en:

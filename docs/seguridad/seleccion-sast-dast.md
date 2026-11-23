@@ -106,7 +106,7 @@ Leyenda: ● cobertura directa · ◐ cobertura parcial · vacío sin cobertura.
 | Pull request | SonarCloud | SAST de calidad y seguridad | Sí (*quality gate*) |
 | Pull request | Trivy (`fs`) | Dependencias de los tres lockfiles | Sí (crítico) |
 | Push a `main` / tras build | Trivy (`image`, `config`) | Imágenes y configuración de Compose | Sí (crítico) |
-| Tras `docker compose up` (entorno de pruebas) | OWASP ZAP baseline | DAST pasivo contra `http://localhost:8080` | No (informa) |
+| Tras `docker compose up` (entorno de pruebas) | OWASP ZAP baseline | DAST pasivo contra `http://localhost:8081` | No (informa) |
 | Programado (semanal) | Gitleaks (`git`, historial completo) | Secretos en todo el historial | No (informa) |
 | Programado (semanal) | OWASP ZAP full | DAST activo, solo en entorno local | No (informa) |
 
