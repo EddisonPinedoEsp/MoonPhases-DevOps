@@ -14,7 +14,7 @@ build/
 pg_password.txt
 secrets/
 *.pem
-*.key 
+*.key
 *.p12
 
 # Docker: overrides locales de Compose
