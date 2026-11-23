@@ -1,0 +1,197 @@
+
+\chapter{Centralización de vulnerabilidades mediante DefectDojo}
+
+\section{Descripción de DefectDojo}
+
+DefectDojo es una plataforma de código abierto para la gestión de
+vulnerabilidades. Recibe los reportes de distintas herramientas de seguridad,
+los convierte a un formato común y los organiza en una jerarquía de
+\textit{producto}, \textit{engagement} y \textit{test}. Sobre esa base permite
+clasificar los hallazgos por severidad, deduplicarlos entre ejecuciones,
+asignarles un estado (activo, verificado, mitigado, falso positivo) y dar
+seguimiento a su corrección.
+
+En este proyecto cumple una función concreta: los resultados de Semgrep,
+Trivy, Gitleaks, TruffleHog y OWASP ZAP tienen formatos distintos y viven en
+archivos y \textit{artifacts} separados. DefectDojo los reúne en un solo
+lugar, de modo que el equipo consulta un único panel en lugar de abrir cada
+reporte. Se utilizó una instancia local desplegada con Docker Compose, y el
+producto creado se llama \texttt{MoonPhases}.
+
+\section{Integración con las herramientas de seguridad}
+
+\subsection{Procedimiento automático}
+
+La carga automática la realiza el script
+\texttt{scripts/upload\_to\_defectdojo.sh}, invocado por el job
+\texttt{upload-defectdojo} del pipeline de GitHub Actions. El job se ejecuta
+al final, después de los escaneos, descarga los reportes publicados como
+\textit{artifacts} y envía cada uno a la API REST de DefectDojo.
+
+\begin{table}[H]
+\centering
+\caption{Reportes importados a DefectDojo y tipo de escaneo.}
+\label{tab:dojo-reportes}
+
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Herramienta} &
+\textbf{Tipo de escaneo (parser)} &
+\textbf{Reporte} \\
+\midrule
+Semgrep & \texttt{Semgrep JSON Report} &
+\texttt{reports/sast/semgrep-report.json} \\
+Trivy & \texttt{Trivy Scan} &
+\texttt{reports/sca/trivy-report.json} \\
+Gitleaks & \texttt{Gitleaks Scan} &
+\texttt{reports/secrets/gitleaks-report.json} \\
+TruffleHog & \texttt{Trufflehog Scan} &
+\texttt{reports/secrets/trufflehog-report.json} \\
+OWASP ZAP & \texttt{ZAP Scan} &
+\texttt{reports/dast/baseline.xml} y \texttt{baseline-api.xml} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El script usa el servicio \texttt{reimport-scan} de la API en lugar de una
+importación simple, con un \textit{engagement} fijo por rama
+(\texttt{CI - <rama>}) y un \textit{test} fijo por reporte. Así DefectDojo
+reconoce los hallazgos que se repiten entre ejecuciones y no los duplica en
+cada \textit{pipeline}; además, con \texttt{close\_old\_findings} marca como
+cerrados los hallazgos que dejaron de aparecer. Cada importación registra
+también la rama, el identificador de ejecución y el \textit{commit}.
+
+Reglas de funcionamiento del script:
+
+\begin{itemize}
+    \item Si un reporte está vacío (Gitleaks y TruffleHog sin hallazgos), se
+    omite sin error.
+    \item Si un reporte no existe (por ejemplo, los de ZAP en el
+    \textit{runner}), se omite y se informa.
+    \item Si una importación falla, el script continúa con los demás reportes
+    y termina con error al final.
+    \item La URL, el token y el identificador del producto se leen de
+    variables y secretos del repositorio de GitHub; el token nunca se escribe
+    en el código.
+\end{itemize}
+
+\begin{lstlisting}[language=yaml, caption={Job que sube los hallazgos a DefectDojo.}, label={lst:dojo-job}]
+upload-defectdojo:
+  needs: [gitleaks-scan, trufflehog-scan, trivy-scan, semgrep-scan]
+  if: ${{ always() && vars.DEFECTDOJO_URL != '' }}
+  env:
+    DEFECTDOJO_URL: ${{ vars.DEFECTDOJO_URL }}
+    DEFECTDOJO_PRODUCT_ID: ${{ vars.DEFECTDOJO_PRODUCT_ID }}
+    DEFECTDOJO_TOKEN: ${{ secrets.DEFECTDOJO_TOKEN }}
+  steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4   # uno por reporte
+    - run: bash scripts/upload_to_defectdojo.sh
+\end{lstlisting}
+
+\subsection{Procedimiento manual y limitaciones}
+
+El mismo script permite subir un reporte de forma manual indicando el tipo de
+escaneo y el archivo (\texttt{./upload\_to\_defectdojo.sh <tipo>
+<archivo>}), y DefectDojo admite además la carga desde su interfaz web, como
+se practicó en la guía de laboratorio del curso. Este procedimiento es el
+adecuado para los reportes de ZAP, que se generan en local y no están en el
+\textit{pipeline}. Su carga con el script está prevista, pero no se ha
+ejecutado todavía.
+
+Existe además una limitación de infraestructura: la instancia de DefectDojo
+corre en un equipo local y el \textit{runner} de GitHub Actions está en la
+nube, por lo que no puede alcanzar \texttt{localhost}. Para las pruebas se
+expuso DefectDojo mediante un túnel de ngrok, cuya dirección cambia si se
+reinicia el túnel. En un entorno estable haría falta un servidor accesible
+públicamente o un \textit{runner} propio.
+
+\evidencefigure
+{figures/DefectDojo.png}
+{Panel de DefectDojo tras la importación de los reportes del pipeline.}
+{fig:defectdojo}
+
+\section{Flujo de gestión de vulnerabilidades}
+
+El proceso completo, desde que una herramienta genera un reporte hasta que el
+hallazgo se mitiga, sigue estos pasos:
+
+\begin{enumerate}
+    \item \textbf{Generación:} cada herramienta de seguridad produce su
+    reporte en JSON o XML durante el \textit{pipeline}.
+    \item \textbf{Importación:} el job \texttt{upload-defectdojo} envía los
+    reportes a DefectDojo. Los hallazgos se deduplican y quedan asociados al
+    producto, a la rama y a la ejecución que los originó.
+    \item \textbf{Clasificación:} el equipo revisa los hallazgos nuevos,
+    confirma su severidad y descarta los falsos positivos. Cada hallazgo se
+    relaciona con una amenaza del modelo STRIDE o se registra como nueva.
+    \item \textbf{Seguimiento:} se asigna un responsable y se prioriza según
+    severidad e impacto (capítulo siguiente).
+    \item \textbf{Mitigación:} se corrige el hallazgo en el código o en la
+    configuración y se vuelve a ejecutar el \textit{pipeline}.
+    \item \textbf{Verificación:} en la siguiente importación, un hallazgo
+    corregido deja de aparecer y DefectDojo lo marca como cerrado, lo que
+    deja registro de su ciclo de vida.
+\end{enumerate}
+
+\begin{infobox}
+\textbf{Flujo general:}
+
+Herramientas de seguridad $\rightarrow$
+Reportes $\rightarrow$
+Importación $\rightarrow$
+DefectDojo $\rightarrow$
+Clasificación $\rightarrow$
+Mitigación.
+\end{infobox}
+
+\section{Resultados de la centralización}
+
+En la ejecución del pipeline del 23 de noviembre de 2026, el job
+\texttt{upload-defectdojo} terminó correctamente. El registro de la
+ejecución muestra el resultado de cada reporte:
+
+\begin{table}[H]
+\centering
+\caption{Resultado de la importación en la ejecución del pipeline.}
+\label{tab:dojo-resultado}
+
+\begin{tabularx}{\textwidth}{l c X}
+\toprule
+\textbf{Reporte} &
+\textbf{Hallazgos} &
+\textbf{Resultado de la importación} \\
+\midrule
+Semgrep & 15 & Importado (HTTP 201). \\
+Trivy & 1 & Importado (HTTP 201). \\
+Gitleaks & 0 & Omitido: reporte vacío (sin secretos). \\
+TruffleHog & 0 & Omitido: reporte vacío (sin secretos). \\
+OWASP ZAP & -- & No ejecutado en el \textit{pipeline}. \\
+\midrule
+\textbf{Total importado} & \textbf{16} & \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Los 16 hallazgos importados se distribuyen así según los reportes de origen:
+15 advertencias de Semgrep (todas \textit{WARNING}, por acciones de GitHub sin
+fijar por \textit{hash}) y 1 vulnerabilidad de severidad alta de Trivy
+(\texttt{body-parser}). Los dos reportes de secretos no tienen hallazgos, y
+los de ZAP (13 alertas en la aplicación web y 17 en la API) esperan su carga
+manual.
+
+La figura~\ref{fig:defectdojo} muestra el panel de DefectDojo después de la
+importación. Coincide con los totales de la tabla anterior:
+
+\begin{itemize}
+    \item \textbf{16 hallazgos} registrados en los últimos siete días, con
+    2 \textit{engagements} activos.
+    \item \textbf{Distribución por severidad:} el gráfico de hallazgos
+    reportados muestra 15 de severidad media y 1 de severidad alta. Los 15
+    medios corresponden a las advertencias de Semgrep y el alto a la
+    vulnerabilidad de \texttt{body-parser} detectada por Trivy. No hay
+    hallazgos críticos ni bajos.
+    \item \textbf{Estado de seguimiento:} 0 hallazgos cerrados y 0 con
+    riesgo aceptado. Todos continúan activos, lo que concuerda con que
+    ninguno ha sido corregido todavía (capítulo siguiente).
+\end{itemize}

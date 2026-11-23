@@ -1,4 +1,7 @@
-FROM node:20-alpine AS build
+ARG NODE_IMAGE=node:20-alpine
+ARG NGINX_IMAGE=nginxinc/nginx-unprivileged:alpine
+
+FROM ${NODE_IMAGE} AS build
 
 WORKDIR /app
 
@@ -10,9 +13,10 @@ COPY index.html ./
 COPY src ./src
 RUN npm run build
 
-FROM nginxinc/nginx-unprivileged:alpine
+FROM ${NGINX_IMAGE}
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html/MoonPhases
 
-EXPOSE 8080
+ARG FRONTEND_CONTAINER_PORT=8081
+EXPOSE ${FRONTEND_CONTAINER_PORT}

@@ -1,0 +1,182 @@
+
+\chapter{Análisis de hallazgos y estrategias de mitigación}
+
+\section{Priorización de hallazgos}
+
+Los hallazgos provienen de dos fuentes: las herramientas de seguridad
+(Semgrep, Trivy, Gitleaks, TruffleHog y OWASP ZAP) y el modelado de amenazas
+STRIDE. Para ordenarlos se consideraron tres criterios:
+
+\begin{enumerate}
+    \item \textbf{Severidad:} la que reporta la herramienta (por ejemplo,
+    alta para el CVE de Trivy y para la versión de Nginx en ZAP) o, en las
+    amenazas de STRIDE, el riesgo calculado como impacto por probabilidad.
+    \item \textbf{Impacto:} qué se pierde si el hallazgo se explota
+    (confidencialidad, integridad o disponibilidad de los datos de
+    \texttt{moon\_notes}).
+    \item \textbf{Criticidad del componente y facilidad de explotación:} se
+    prioriza lo que es alcanzable desde la red sin credenciales, como la API,
+    por encima de lo que exige acceso previo al servidor.
+\end{enumerate}
+
+Cuando un hallazgo de una herramienta coincide con una amenaza del modelo, se
+trata como una sola entrada y se indica su origen. Esto ocurre con el CORS
+abierto, las cabeceras ausentes y los errores expuestos, que el análisis
+STRIDE predijo y ZAP confirmó. Los 15 avisos de Semgrep comparten una misma
+regla y una misma causa, por lo que se agrupan en un único hallazgo.
+
+\section{Tabla de hallazgos identificados}
+
+\begin{longtable}{
+    p{0.8cm}
+    p{4.1cm}
+    p{1.4cm}
+    p{2.3cm}
+    p{5.0cm}
+}
+
+\caption{Hallazgos de seguridad y recomendaciones de mitigación.}
+\label{tab:hallazgos}\\
+
+\toprule
+\textbf{ID} &
+\textbf{Descripción} &
+\textbf{Severidad} &
+\textbf{Herramienta} &
+\textbf{Recomendación de mitigación} \\
+\midrule
+\endfirsthead
+
+\multicolumn{5}{c}{
+    \tablename\ \thetable{} -- continuación
+}\\
+\toprule
+\textbf{ID} &
+\textbf{Descripción} &
+\textbf{Severidad} &
+\textbf{Herramienta} &
+\textbf{Recomendación de mitigación} \\
+\midrule
+\endhead
+
+\midrule
+\multicolumn{5}{r}{Continúa en la siguiente página}\\
+\endfoot
+
+\bottomrule
+\endlastfoot
+
+001 & La API no tiene autenticación ni autorización: cualquiera puede
+leer, crear, modificar y borrar notas (S1, T1). &
+Alta & Modelado STRIDE &
+Añadir autenticación (sesión o JWT) y autorización por recurso. Como
+mínimo, proteger \texttt{POST} y \texttt{DELETE} con un token. \\
+
+002 & Dependencia \texttt{body-parser} 1.20.8 con CVE-2026-111181:
+denegación de servicio por error no controlado en la descompresión. &
+Alta & Trivy &
+Actualizar \texttt{body-parser} a 1.20.9 en \texttt{backend} y regenerar
+\texttt{package-lock.json}. \\
+
+003 & Nginx expone una versión con vulnerabilidades conocidas en la
+cabecera \texttt{Server}. &
+Alta & OWASP ZAP &
+Actualizar la imagen de Nginx a una versión corregida, fijarla por
+\textit{digest} y ocultar la versión (\texttt{server\_tokens off}). \\
+
+004 & Faltan cabeceras de seguridad (CSP, anti-clickjacking,
+\texttt{X-Content-Type-Options}) y no hay TLS (T4). &
+Media & OWASP ZAP &
+Añadir las cabeceras con \texttt{add\_header} en Nginx y terminar TLS en el
+despliegue. \\
+
+005 & CORS abierto: la API responde
+\texttt{Access-Control-Allow-Origin: *} (T3). &
+Media & OWASP ZAP &
+Restringir el origen con \texttt{cors(\{ origin: <frontend> \})}. \\
+
+006 & Acciones de GitHub referenciadas por etiqueta mutable en el pipeline
+(15 avisos de una misma regla). &
+Media & Semgrep &
+Fijar cada acción por el \textit{hash} completo del commit. \\
+
+007 & Fuga de información: errores 500 con \texttt{err.message} y
+cabeceras \texttt{X-Powered-By} y \texttt{Server} (I1). &
+Baja & OWASP ZAP y STRIDE &
+Responder con mensajes genéricos, registrar el detalle en el servidor y
+desactivar \texttt{X-Powered-By}. \\
+
+\end{longtable}
+
+Gitleaks y TruffleHog no generaron hallazgos, por lo que no figuran en la
+tabla. Tampoco se incluyen aquí las amenazas del modelo de riesgo menor o no
+verificadas (candidatas), que se describen en el capítulo de modelado de
+amenazas. Entre las confirmadas solo por el análisis del código, y no por
+herramientas, destacan la ausencia de límites de tasa (D1) y el puerto 3001
+publicado (S2).
+
+\section{Análisis de las mitigaciones}
+
+\subsection{Estado actual}
+
+En el momento de redactar este informe \textbf{ninguno de los siete
+hallazgos de la tabla ha sido corregido}. El trabajo realizado se centró en
+construir el modelo de amenazas, implementar las herramientas de análisis y
+centralizar sus resultados en DefectDojo. Los hallazgos están por tanto
+\textbf{pendientes}, y la corrección se plantea como la siguiente fase.
+
+Sí se aplicaron mejoras que no corrigen un hallazgo concreto pero reducen la
+superficie de configuración: los valores de \texttt{compose.yaml} y de los
+\texttt{Dockerfile} (imágenes, puertos y variables) dejaron de estar escritos
+a mano y ahora se leen de variables del repositorio. Además, se mantienen
+vigentes los controles existentes: consultas SQL parametrizadas, PostgreSQL
+en una red interna y sin publicar, contenedores sin permisos de
+administrador, contraseña como \textit{Docker secret} fuera de Git y rama
+\texttt{main} protegida con revisión obligatoria.
+
+\subsection{Plan de corrección propuesto}
+
+Las acciones se ordenan por esfuerzo e impacto, de modo que las más baratas
+y efectivas se hagan primero:
+
+\begin{table}[H]
+\centering
+\caption{Orden sugerido de corrección.}
+\label{tab:plan-correccion}
+
+\begin{tabularx}{\textwidth}{c X l}
+\toprule
+\textbf{Orden} &
+\textbf{Acción} &
+\textbf{Hallazgo} \\
+\midrule
+1 & Actualizar \texttt{body-parser} a 1.20.9 (un cambio de dependencia). &
+002 \\
+
+2 & Actualizar la imagen de Nginx, fijarla por \textit{digest} y ocultar su
+versión. & 003 \\
+
+3 & Eliminar \texttt{ports: "3001:3001"} del backend, para que el acceso pase
+siempre por Nginx. & S2 \\
+
+4 & Respuestas de error genéricas y sin \texttt{X-Powered-By}. & 007 \\
+
+5 & Restringir CORS y añadir cabeceras de seguridad en Nginx. & 004, 005 \\
+
+6 & Fijar las acciones de GitHub por \textit{hash}. & 006 \\
+
+7 & Autenticación y autorización en la API (cambio de mayor alcance). &
+001 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Verificación de las correcciones}
+
+Cada corrección se validará volviendo a ejecutar el \textit{pipeline}. Un
+hallazgo resuelto debe desaparecer de su reporte (Trivy, ZAP o Semgrep) y, en
+la siguiente importación, DefectDojo lo marcará como cerrado. Los hallazgos
+que se mantengan seguirán activos y se justificará su aceptación o su
+aplazamiento. Para los que hoy no detecta ninguna herramienta, como la
+ausencia de límites de tasa, se propone añadir pruebas propias o reglas
+personalizadas de Semgrep.

@@ -1,0 +1,440 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3200" height="1700" viewBox="0 0 3200 1700" font-family="Liberation Sans, Arial, Helvetica, sans-serif">
+<defs>
+<pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#18233a" stroke-width="1"/></pattern>
+<marker id="ma" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L10 4L0 8z" fill="#cbd5e1"/></marker>
+<marker id="sa" markerWidth="10" markerHeight="8" refX="1" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 0L10 4L0 8z" fill="#cbd5e1"/></marker>
+<marker id="mr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path d="M0 0L10 4L0 8z" fill="#f87171"/></marker>
+<marker id="sr" markerWidth="10" markerHeight="8" refX="1" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M0 0L10 4L0 8z" fill="#f87171"/></marker>
+</defs>
+<rect width="3200" height="1700" fill="#0b1220"/><rect width="3200" height="1700" fill="url(#g)"/>
+<text x="40" y="49" font-size="30" fill="#e5e7eb" text-anchor="start" font-weight="bold">MoonPhases-DevOps · Diagrama de flujo de datos (DFD) con análisis STRIDE</text>
+<text x="40" y="78" font-size="15" fill="#94a3b8" text-anchor="start">Arquitectura actual verificada en compose.yaml, nginx.conf, server.js y db.js · Frontend publicado en :8081 · Backend :3001 · PostgreSQL :5432 (solo red interna)</text>
+<rect x="40" y="130" width="500" height="650" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="10 5"/>
+<text x="50" y="148" font-size="15" fill="#e2e8f0" text-anchor="start" font-weight="bold">TB1 · Internet / navegador (red no confiable)</text>
+<rect x="760" y="130" width="1050" height="650" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="10 5"/>
+<text x="770" y="148" font-size="15" fill="#e2e8f0" text-anchor="start" font-weight="bold">TB2 · Red Docker pública (public): Nginx y Express</text>
+<rect x="2040" y="130" width="460" height="650" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="10 5"/>
+<text x="2050" y="148" font-size="15" fill="#e2e8f0" text-anchor="start" font-weight="bold">TB3 · Red Docker privada (private, internal)</text>
+<rect x="40" y="800" width="700" height="210" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="2 6"/>
+<text x="50" y="818" font-size="15" fill="#e2e8f0" text-anchor="start" font-weight="bold">TB4 · Desarrollo y GitHub (zona lógica)</text>
+<rect x="1390" y="790" width="1110" height="220" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="2 6"/>
+<text x="1400" y="808" font-size="15" fill="#e2e8f0" text-anchor="start" font-weight="bold">TB5 · Secretos y almacenamiento persistente (zona lógica del host)</text>
+<rect x="800" y="170" width="330" height="530" rx="6" fill="#2dd4bf" fill-opacity="0.06" stroke="#2dd4bf" stroke-opacity="0.8" stroke-width="1.5"/>
+<text x="810" y="184" font-size="13" fill="#2dd4bf" text-anchor="start" font-weight="bold">Contenedor frontend (nginx-unprivileged)</text>
+<rect x="1420" y="170" width="330" height="530" rx="6" fill="#818cf8" fill-opacity="0.06" stroke="#818cf8" stroke-opacity="0.8" stroke-width="1.5"/>
+<text x="1430" y="184" font-size="13" fill="#818cf8" text-anchor="start" font-weight="bold">Contenedor backend (Node 20 · Express)</text>
+<rect x="2070" y="170" width="400" height="530" rx="6" fill="#4ade80" fill-opacity="0.06" stroke="#4ade80" stroke-opacity="0.8" stroke-width="1.5"/>
+<text x="2080" y="184" font-size="13" fill="#4ade80" text-anchor="start" font-weight="bold">Contenedor PostgreSQL 16.3 (solo red private)</text>
+<g stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round"><circle cx="120.0" cy="209.2" r="15.600000000000001" fill="#1e3a5f"/><path d="M120.0 224.8V269.2M82.0 240.4H158.0M120.0 269.2L92.0 310M120.0 269.2L148.0 310"/></g>
+<text x="120.0" y="330" font-size="14" fill="#e5e7eb" text-anchor="middle" font-weight="bold">Usuario legítimo</text>
+<g stroke="#f87171" stroke-width="2" fill="none" stroke-linecap="round"><circle cx="120.0" cy="559.2" r="15.600000000000001" fill="#4a1d1d"/><path d="M120.0 574.8V619.2M82.0 590.4H158.0M120.0 619.2L92.0 660M120.0 619.2L148.0 660"/></g>
+<text x="120.0" y="680" font-size="14" fill="#e5e7eb" text-anchor="middle" font-weight="bold">Atacante externo</text>
+<g stroke="#a78bfa" stroke-width="2" fill="none" stroke-linecap="round"><circle cx="110.0" cy="847.6" r="14.3" fill="#3b2a5f"/><path d="M110.0 861.9V902.6M72.0 876.2H148.0M110.0 902.6L82.0 940M110.0 902.6L138.0 940"/></g>
+<text x="110.0" y="960" font-size="14" fill="#e5e7eb" text-anchor="middle" font-weight="bold">Desarrollador</text>
+<rect x="300" y="190" width="200" height="190" rx="12" fill="#1e3a5f" stroke="#60a5fa" stroke-width="2"/>
+<text x="400.0" y="271.0" font-size="14" fill="#e5e7eb" text-anchor="middle">P0 · Navegador del</text><text x="400.0" y="289.0" font-size="14" fill="#e5e7eb" text-anchor="middle">usuario (SPA Three.js)</text><text x="400.0" y="307.0" font-size="14" fill="#e5e7eb" text-anchor="middle">fetch('/api/…')</text>
+<rect x="830" y="265" width="270" height="120" rx="12" fill="#0f3d3e" stroke="#2dd4bf" stroke-width="2"/>
+<text x="965.0" y="311.0" font-size="14" fill="#e5e7eb" text-anchor="middle">P1 · Nginx: servidor estático</text><text x="965.0" y="329.0" font-size="14" fill="#e5e7eb" text-anchor="middle">SPA en /MoonPhases/</text><text x="965.0" y="347.0" font-size="14" fill="#e5e7eb" text-anchor="middle">escucha :8081</text>
+<rect x="830" y="480" width="270" height="130" rx="12" fill="#0f3d3e" stroke="#2dd4bf" stroke-width="2"/>
+<text x="965.0" y="531.0" font-size="14" fill="#e5e7eb" text-anchor="middle">P2 · Proxy inverso Nginx</text><text x="965.0" y="549.0" font-size="14" fill="#e5e7eb" text-anchor="middle">location /api/</text><text x="965.0" y="567.0" font-size="14" fill="#e5e7eb" text-anchor="middle">proxy_pass backend:3001</text>
+<rect x="1450" y="265" width="270" height="130" rx="12" fill="#1e2a6b" stroke="#818cf8" stroke-width="2"/>
+<text x="1585.0" y="316.0" font-size="14" fill="#e5e7eb" text-anchor="middle">P3 · API REST Express</text><text x="1585.0" y="334.0" font-size="14" fill="#e5e7eb" text-anchor="middle">:3001 · /api/notes</text><text x="1585.0" y="352.0" font-size="14" fill="#e5e7eb" text-anchor="middle">/api/health</text>
+<rect x="1450" y="500" width="270" height="110" rx="12" fill="#1e2a6b" stroke="#818cf8" stroke-width="2"/>
+<text x="1585.0" y="550.0" font-size="14" fill="#e5e7eb" text-anchor="middle">P4 · Gestor de conexiones</text><text x="1585.0" y="568.0" font-size="14" fill="#e5e7eb" text-anchor="middle">pg.Pool (db.js)</text>
+<rect x="2100" y="480" width="340" height="130" rx="12" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
+<text x="2270.0" y="540.0" font-size="14" fill="#e5e7eb" text-anchor="middle">P5 · Servidor PostgreSQL</text><text x="2270.0" y="558.0" font-size="14" fill="#e5e7eb" text-anchor="middle">:5432 · rol moonuser</text>
+<rect x="330" y="850" width="170" height="100" rx="12" fill="#3b2a5f" stroke="#a78bfa" stroke-width="2"/>
+<text x="415.0" y="895.0" font-size="14" fill="#e5e7eb" text-anchor="middle">P6 · Repositorio</text><text x="415.0" y="913.0" font-size="14" fill="#e5e7eb" text-anchor="middle">GitHub</text>
+<path d="M2200 249V351A80.0 14 0 0 0 2360 351V249A80.0 14 0 0 0 2200 249z" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
+<ellipse cx="2280.0" cy="249" rx="80.0" ry="14" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
+<text x="2280.0" y="302.0" font-size="14" fill="#e5e7eb" text-anchor="middle">DS1 · Tabla</text><text x="2280.0" y="320.0" font-size="14" fill="#e5e7eb" text-anchor="middle">moon_notes</text>
+<path d="M2260 854V956A90.0 14 0 0 0 2440 956V854A90.0 14 0 0 0 2260 854z" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
+<ellipse cx="2350.0" cy="854" rx="90.0" ry="14" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
+<text x="2350.0" y="907.0" font-size="14" fill="#e5e7eb" text-anchor="middle">DS2 · Volumen</text><text x="2350.0" y="925.0" font-size="14" fill="#e5e7eb" text-anchor="middle">postgres-data</text>
+<rect x="1450" y="850" width="300" height="100" fill="#334155"/>
+<path d="M1450 850H1750M1450 950H1750" stroke="#cbd5e1" stroke-width="3" fill="none"/>
+<text x="1600.0" y="886.0" font-size="14" fill="#e5e7eb" text-anchor="middle">DS3 · pg_password.txt</text><text x="1600.0" y="904.0" font-size="14" fill="#e5e7eb" text-anchor="middle">Docker secret montado en</text><text x="1600.0" y="922.0" font-size="14" fill="#e5e7eb" text-anchor="middle">/run/secrets/pg_password</text>
+<rect x="550" y="850" width="170" height="100" fill="#3b2a5f"/>
+<path d="M550 850H720M550 950H720" stroke="#a78bfa" stroke-width="3" fill="none"/>
+<text x="635.0" y="886.0" font-size="14" fill="#e5e7eb" text-anchor="middle">DS4 · Código fuente</text><text x="635.0" y="904.0" font-size="14" fill="#e5e7eb" text-anchor="middle">(src, Dockerfiles,</text><text x="635.0" y="922.0" font-size="14" fill="#e5e7eb" text-anchor="middle">compose.yaml)</text>
+<polyline points="170,250 300,250" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#ma)"/>
+<polyline points="500,280 830,280" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<polyline points="830,340 500,340" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<polyline points="400,380 400,505 830,505" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<polyline points="170,575 830,575" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<polyline points="170,640 260,640 260,745 1450,745 1450,700" fill="none" stroke="#f87171" stroke-width="2.5" stroke-dasharray="9 6" marker-end="url(#mr)"/>
+<polyline points="1100,545 1275,545 1275,330 1450,330" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<polyline points="1585,395 1585,500" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)" marker-start="url(#sa)"/>
+<polyline points="1720,530 2100,530" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<polyline points="2100,585 1720,585" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<polyline points="2280,365 2280,480" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)" marker-start="url(#sa)"/>
+<polyline points="2350,700 2350,840" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)" marker-start="url(#sa)"/>
+<polyline points="1620,850 1620,700" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<polyline points="1750,900 2150,900 2150,700" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<polyline points="160,890 330,890" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<polyline points="500,900 550,900" fill="none" stroke="#cbd5e1" stroke-width="1.5" marker-end="url(#ma)"/>
+<text x="650" y="268" font-size="13" fill="#e5e7eb" text-anchor="middle">F1 · solicitud HTTP :8081</text>
+<text x="650" y="356" font-size="13" fill="#e5e7eb" text-anchor="middle">F2 · SPA y respuestas</text>
+<text x="650" y="492" font-size="13" fill="#e5e7eb" text-anchor="middle">F3 · /api/ notas</text>
+<text x="650" y="591" font-size="13" fill="#fca5a5" text-anchor="middle">F9 · atacante vía :8081</text>
+<text x="900" y="714" font-size="13" fill="#fca5a5" text-anchor="middle">F10 · HTTP :3001 directo</text><text x="900" y="731" font-size="13" fill="#fca5a5" text-anchor="middle">(puerto publicado en compose)</text>
+<text x="1285" y="420" font-size="13" fill="#e5e7eb" text-anchor="start">F4 · proxy_pass</text><text x="1285" y="437" font-size="13" fill="#e5e7eb" text-anchor="start">→ backend:3001</text>
+<text x="1595" y="435" font-size="13" fill="#e5e7eb" text-anchor="start">pool.query($1,$2)</text><text x="1595" y="452" font-size="13" fill="#e5e7eb" text-anchor="start">↔ filas</text>
+<text x="1925" y="498" font-size="13" fill="#e5e7eb" text-anchor="middle">F5 · consulta SQL</text><text x="1925" y="515" font-size="13" fill="#e5e7eb" text-anchor="middle">parametrizada :5432</text>
+<text x="1925" y="602" font-size="13" fill="#e5e7eb" text-anchor="middle">F6 · resultados (filas)</text>
+<text x="2290" y="415" font-size="13" fill="#e5e7eb" text-anchor="start">lee / escribe</text><text x="2290" y="432" font-size="13" fill="#e5e7eb" text-anchor="start">filas (CRUD)</text>
+<text x="2340" y="732" font-size="13" fill="#e5e7eb" text-anchor="end">persistencia</text><text x="2340" y="749" font-size="13" fill="#e5e7eb" text-anchor="end">en disco</text>
+<text x="1610" y="732" font-size="13" fill="#e5e7eb" text-anchor="end">F7 · contraseña</text><text x="1610" y="749" font-size="13" fill="#e5e7eb" text-anchor="end">vía archivo</text>
+<text x="1950" y="884" font-size="13" fill="#e5e7eb" text-anchor="middle">F7 · contraseña vía archivo (PostgreSQL)</text>
+<text x="245" y="872" font-size="13" fill="#e5e7eb" text-anchor="middle">F8 · git push / PR</text>
+<circle cx="852.0" cy="237.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2"/>
+<text x="852.0" y="242.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">T4</text>
+<circle cx="852.0" cy="452.0" r="21.0" fill="#ef4444" stroke="#f8fafc" stroke-width="2"/>
+<text x="852.0" y="457.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">D1</text>
+<circle cx="1472.0" cy="237.0" r="21.0" fill="#ef4444" stroke="#f8fafc" stroke-width="2"/>
+<text x="1472.0" y="242.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">S1</text>
+<circle cx="1519.0" cy="237.0" r="21.0" fill="#ef4444" stroke="#f8fafc" stroke-width="2"/>
+<text x="1519.0" y="242.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">T1</text>
+<circle cx="1566.0" cy="237.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2"/>
+<text x="1566.0" y="242.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">T2</text>
+<circle cx="1613.0" cy="237.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2"/>
+<text x="1613.0" y="242.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">T3</text>
+<circle cx="1660.0" cy="237.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2"/>
+<text x="1660.0" y="242.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">I1</text>
+<circle cx="1707.0" cy="237.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2"/>
+<text x="1707.0" y="242.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">R1</text>
+<circle cx="1482.0" cy="470.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="1482.0" y="475.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">D2</text>
+<circle cx="1925.0" cy="558.0" r="21.0" fill="#a3e635" stroke="#f8fafc" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="1925.0" y="563.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">I3</text>
+<circle cx="2132.0" cy="452.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="2132.0" y="457.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">E1</text>
+<circle cx="1230.0" cy="745.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2"/>
+<text x="1230.0" y="750.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">S2</text>
+<circle cx="2227.0" cy="917.0" r="21.0" fill="#a3e635" stroke="#f8fafc" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="2227.0" y="922.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">I4</text>
+<circle cx="1722.0" cy="978.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="1722.0" y="983.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">I2</text>
+<circle cx="352.0" cy="978.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="352.0" y="983.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">S3</text>
+<circle cx="399.0" cy="978.0" r="21.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2"/>
+<text x="399.0" y="983.0" font-size="15" font-weight="bold" fill="#0b1220" text-anchor="middle">T5</text>
+<rect x="780" y="820" width="590" height="180" rx="6" fill="#0f172a" fill-opacity="0.9" stroke="#334155" stroke-width="1.5"/>
+<text x="796" y="840" font-size="13" fill="#e5e7eb" text-anchor="start" font-weight="bold">Criterio de riesgo = Impacto (1–3) × Probabilidad (1–3)</text>
+<text x="796" y="867" font-size="13" fill="#cbd5e1" text-anchor="start">Impacto 1: facilita otros ataques · 2: degradación o pérdida parcial</text>
+<text x="796" y="894" font-size="13" fill="#cbd5e1" text-anchor="start">Impacto 3: alteración/pérdida total de datos o control del componente</text>
+<text x="796" y="921" font-size="13" fill="#cbd5e1" text-anchor="start">Probabilidad 1: requiere acceso previo (host, cuenta, compromiso)</text>
+<text x="796" y="948" font-size="13" fill="#cbd5e1" text-anchor="start">Probabilidad 2: requiere una condición adicional · 3: explotable hoy</text>
+<text x="796" y="975" font-size="13" fill="#e5e7eb" text-anchor="start" font-weight="bold">Puntaje 1–2 = Bajo · 3–4 = Medio · 6–9 = Alto</text>
+<rect x="2540" y="130" width="620" height="470" rx="6" fill="#0f172a" fill-opacity="0.9" stroke="#334155" stroke-width="1.5"/>
+<text x="2560" y="155" font-size="18" fill="#e5e7eb" text-anchor="start" font-weight="bold">Leyenda</text>
+<g stroke="#60a5fa" stroke-width="2" fill="none" stroke-linecap="round"><circle cx="2573.0" cy="180.8" r="3.9000000000000004" fill="#1e3a5f"/><path d="M2573.0 184.7V195.8M2563.12 188.6H2582.88M2573.0 195.8L2565.72 206M2573.0 195.8L2580.28 206"/></g>
+<text x="2610" y="192" font-size="13" fill="#e5e7eb" text-anchor="start">Entidad externa (actor)</text>
+<rect x="2556" y="211" width="40" height="24" rx="12" fill="#1e2a6b" stroke="#818cf8" stroke-width="2"/>
+<text x="2610" y="225" font-size="13" fill="#e5e7eb" text-anchor="start">Proceso / componente</text>
+<path d="M2560 255V257A15.0 14 0 0 0 2590 257V255A15.0 14 0 0 0 2560 255z" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
+<ellipse cx="2575.0" cy="255" rx="15.0" ry="14" fill="#14532d" stroke="#4ade80" stroke-width="2"/>
+<text x="2610" y="258" font-size="13" fill="#e5e7eb" text-anchor="start">Almacén de datos (BD, volumen)</text>
+<rect x="2556" y="277" width="40" height="24" fill="#334155"/>
+<path d="M2556 277H2596M2556 301H2596" stroke="#cbd5e1" stroke-width="3" fill="none"/>
+<text x="2610" y="291" font-size="13" fill="#e5e7eb" text-anchor="start">Almacén de archivos / activo</text>
+<polyline points="2556,322 2596,322" fill="none" stroke="#cbd5e1" stroke-width="2.5" marker-end="url(#ma)"/>
+<text x="2610" y="324" font-size="13" fill="#e5e7eb" text-anchor="start">Flujo de datos esperado</text>
+<polyline points="2556,355 2596,355" fill="none" stroke="#f87171" stroke-width="2.5" stroke-dasharray="9 6" marker-end="url(#mr)"/>
+<text x="2610" y="357" font-size="13" fill="#e5e7eb" text-anchor="start">Acceso directo que evita Nginx (F10)</text>
+<rect x="2556" y="377" width="40" height="22" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="10 5"/>
+<text x="2610" y="390" font-size="13" fill="#e5e7eb" text-anchor="start">Trust Boundary de red (TB1, TB2, TB3)</text>
+<rect x="2556" y="410" width="40" height="22" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="2 6"/>
+<text x="2610" y="423" font-size="13" fill="#e5e7eb" text-anchor="start">Trust Boundary lógico (TB4, TB5)</text>
+<circle cx="2571.0" cy="454.0" r="14.0" fill="#ef4444" stroke="#f8fafc" stroke-width="2"/>
+<text x="2610" y="456" font-size="13" fill="#e5e7eb" text-anchor="start">Riesgo Alto (puntaje 6–9)</text>
+<circle cx="2571.0" cy="487.0" r="14.0" fill="#f59e0b" stroke="#f8fafc" stroke-width="2"/>
+<text x="2610" y="489" font-size="13" fill="#e5e7eb" text-anchor="start">Riesgo Medio (puntaje 3–4)</text>
+<circle cx="2571.0" cy="520.0" r="14.0" fill="#a3e635" stroke="#f8fafc" stroke-width="2"/>
+<text x="2610" y="522" font-size="13" fill="#e5e7eb" text-anchor="start">Riesgo Bajo (puntaje 1–2)</text>
+<circle cx="2571.0" cy="553.0" r="14.0" fill="#64748b" stroke="#f8fafc" stroke-width="2"/>
+<text x="2610" y="555" font-size="13" fill="#e5e7eb" text-anchor="start">Contorno sólido: amenaza confirmada</text>
+<circle cx="2571.0" cy="586.0" r="14.0" fill="#64748b" stroke="#f8fafc" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="2610" y="588" font-size="13" fill="#e5e7eb" text-anchor="start">Contorno discontinuo: candidata o mitigada</text>
+<text x="2540" y="638" font-size="16" fill="#e5e7eb" text-anchor="start" font-weight="bold">Categorías STRIDE y propiedad de seguridad</text>
+<rect x="2540" y="657" width="50" height="32" fill="#1f2a44" stroke="#334155" stroke-width="1"/>
+<rect x="2590" y="657" width="360" height="32" fill="#1f2a44" stroke="#334155" stroke-width="1"/>
+<text x="2598" y="677.55" font-size="13" fill="#e5e7eb" font-weight="bold">Categoría</text>
+<rect x="2950" y="657" width="210" height="32" fill="#1f2a44" stroke="#334155" stroke-width="1"/>
+<text x="2958" y="677.55" font-size="13" fill="#e5e7eb" font-weight="bold">Propiedad</text>
+<rect x="2540" y="689" width="50" height="42" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2565.0" y="716.3" font-size="18" fill="#e5e7eb" text-anchor="middle" font-weight="bold">S</text>
+<rect x="2590" y="689" width="360" height="42" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2598" y="714.55" font-size="13" fill="#e5e7eb">Spoofing / Suplantación</text>
+<rect x="2950" y="689" width="210" height="42" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2958" y="714.55" font-size="13" fill="#e5e7eb">Autenticidad</text>
+<rect x="2540" y="731" width="50" height="42" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2565.0" y="758.3" font-size="18" fill="#e5e7eb" text-anchor="middle" font-weight="bold">T</text>
+<rect x="2590" y="731" width="360" height="42" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2598" y="756.55" font-size="13" fill="#e5e7eb">Tampering / Manipulación</text>
+<rect x="2950" y="731" width="210" height="42" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2958" y="756.55" font-size="13" fill="#e5e7eb">Integridad</text>
+<rect x="2540" y="773" width="50" height="42" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2565.0" y="800.3" font-size="18" fill="#e5e7eb" text-anchor="middle" font-weight="bold">R</text>
+<rect x="2590" y="773" width="360" height="42" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2598" y="798.55" font-size="13" fill="#e5e7eb">Repudiation / Repudio</text>
+<rect x="2950" y="773" width="210" height="42" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2958" y="798.55" font-size="13" fill="#e5e7eb">Trazabilidad, no repudio</text>
+<rect x="2540" y="815" width="50" height="42" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2565.0" y="842.3" font-size="18" fill="#e5e7eb" text-anchor="middle" font-weight="bold">I</text>
+<rect x="2590" y="815" width="360" height="42" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2598" y="840.55" font-size="13" fill="#e5e7eb">Information Disclosure / Divulgación</text>
+<rect x="2950" y="815" width="210" height="42" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2958" y="840.55" font-size="13" fill="#e5e7eb">Confidencialidad</text>
+<rect x="2540" y="857" width="50" height="42" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2565.0" y="884.3" font-size="18" fill="#e5e7eb" text-anchor="middle" font-weight="bold">D</text>
+<rect x="2590" y="857" width="360" height="42" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2598" y="882.55" font-size="13" fill="#e5e7eb">Denial of Service / Denegación</text>
+<rect x="2950" y="857" width="210" height="42" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2958" y="882.55" font-size="13" fill="#e5e7eb">Disponibilidad</text>
+<rect x="2540" y="899" width="50" height="42" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2565.0" y="926.3" font-size="18" fill="#e5e7eb" text-anchor="middle" font-weight="bold">E</text>
+<rect x="2590" y="899" width="360" height="42" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2598" y="924.55" font-size="13" fill="#e5e7eb">Elevation of Privilege / Escalamiento</text>
+<rect x="2950" y="899" width="210" height="42" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2958" y="924.55" font-size="13" fill="#e5e7eb">Autorización</text>
+<text x="40" y="1063" font-size="18" fill="#e5e7eb" text-anchor="start" font-weight="bold">Matriz de amenazas STRIDE (resumen; el detalle con impacto, probabilidad y mitigación está en el documento)</text>
+<rect x="40" y="1084" width="70" height="34" fill="#1f2a44" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1105.55" font-size="13" fill="#e5e7eb" font-weight="bold">ID</text>
+<rect x="110" y="1084" width="150" height="34" fill="#1f2a44" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1105.55" font-size="13" fill="#e5e7eb" font-weight="bold">STRIDE</text>
+<rect x="260" y="1084" width="380" height="34" fill="#1f2a44" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1105.55" font-size="13" fill="#e5e7eb" font-weight="bold">Componente / flujo</text>
+<rect x="640" y="1084" width="1470" height="34" fill="#1f2a44" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1105.55" font-size="13" fill="#e5e7eb" font-weight="bold">Escenario de ataque</text>
+<rect x="2110" y="1084" width="560" height="34" fill="#1f2a44" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1105.55" font-size="13" fill="#e5e7eb" font-weight="bold">Evidencia en el código</text>
+<rect x="2670" y="1084" width="130" height="34" fill="#1f2a44" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1105.55" font-size="13" fill="#e5e7eb" font-weight="bold">Estado</text>
+<rect x="2800" y="1084" width="360" height="34" fill="#1f2a44" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1105.55" font-size="13" fill="#e5e7eb" font-weight="bold">Riesgo</text>
+<rect x="40" y="1118" width="70" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1139.05" font-size="13" fill="#e5e7eb" font-weight="bold">S1</text>
+<rect x="110" y="1118" width="150" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1139.05" font-size="13" fill="#e5e7eb">Spoofing</text>
+<rect x="260" y="1118" width="380" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1139.05" font-size="13" fill="#e5e7eb">P3 API Express (todas las rutas)</text>
+<rect x="640" y="1118" width="1470" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1139.05" font-size="13" fill="#e5e7eb">Un atacante actúa como cualquier usuario: la API no autentica ni identifica a quien la llama.</text>
+<rect x="2110" y="1118" width="560" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1139.05" font-size="13" fill="#e5e7eb">server.js: sin middleware de autenticación · schema.sql:2</text>
+<rect x="2670" y="1118" width="130" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1139.05" font-size="13" fill="#e5e7eb">Confirmada</text>
+<rect x="2800" y="1118" width="360" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1139.05" font-size="13" fill="#ef4444" font-weight="bold">Alto (9)</text>
+<rect x="40" y="1151" width="70" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1172.05" font-size="13" fill="#e5e7eb" font-weight="bold">S2</text>
+<rect x="110" y="1151" width="150" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1172.05" font-size="13" fill="#e5e7eb">Spoofing</text>
+<rect x="260" y="1151" width="380" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1172.05" font-size="13" fill="#e5e7eb">F10 · puerto 3001 publicado</text>
+<rect x="640" y="1151" width="1470" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1172.05" font-size="13" fill="#e5e7eb">El atacante llega a Express sin pasar por Nginx; cualquier control futuro del proxy se evita.</text>
+<rect x="2110" y="1151" width="560" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1172.05" font-size="13" fill="#e5e7eb">compose.yaml: ports "3001:3001" en backend</text>
+<rect x="2670" y="1151" width="130" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1172.05" font-size="13" fill="#e5e7eb">Confirmada</text>
+<rect x="2800" y="1151" width="360" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1172.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (3)</text>
+<rect x="40" y="1184" width="70" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1205.05" font-size="13" fill="#e5e7eb" font-weight="bold">S3</text>
+<rect x="110" y="1184" width="150" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1205.05" font-size="13" fill="#e5e7eb">Spoofing</text>
+<rect x="260" y="1184" width="380" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1205.05" font-size="13" fill="#e5e7eb">P6 GitHub / cuenta del desarrollador</text>
+<rect x="640" y="1184" width="1470" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1205.05" font-size="13" fill="#e5e7eb">Cuenta comprometida o suplantada sube código malicioso. Control: main exige 1 revisión por PR.</text>
+<rect x="2110" y="1184" width="560" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1205.05" font-size="13" fill="#e5e7eb">Protección de rama main: 1 revisión; firmas no exigidas</text>
+<rect x="2670" y="1184" width="130" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1205.05" font-size="13" fill="#e5e7eb">Mitigada</text>
+<rect x="2800" y="1184" width="360" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1205.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (3)</text>
+<rect x="40" y="1217" width="70" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1238.05" font-size="13" fill="#e5e7eb" font-weight="bold">T1</text>
+<rect x="110" y="1217" width="150" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1238.05" font-size="13" fill="#e5e7eb">Tampering</text>
+<rect x="260" y="1217" width="380" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1238.05" font-size="13" fill="#e5e7eb">P3 → DS1 moon_notes</text>
+<rect x="640" y="1217" width="1470" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1238.05" font-size="13" fill="#e5e7eb">POST (upsert) y DELETE sobrescriben o borran la nota de cualquier fecha sin autorización.</text>
+<rect x="2110" y="1217" width="560" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1238.05" font-size="13" fill="#e5e7eb">server.js:43-74</text>
+<rect x="2670" y="1217" width="130" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1238.05" font-size="13" fill="#e5e7eb">Confirmada</text>
+<rect x="2800" y="1217" width="360" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1238.05" font-size="13" fill="#ef4444" font-weight="bold">Alto (9)</text>
+<rect x="40" y="1250" width="70" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1271.05" font-size="13" fill="#e5e7eb" font-weight="bold">T2</text>
+<rect x="110" y="1250" width="150" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1271.05" font-size="13" fill="#e5e7eb">Tampering</text>
+<rect x="260" y="1250" width="380" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1271.05" font-size="13" fill="#e5e7eb">F3/F4 · entrada de datos a P3</text>
+<rect x="640" y="1250" width="1470" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1271.05" font-size="13" fill="#e5e7eb">Parámetro :date y campo content sin validar formato ni longitud. SQL parametrizado: sin inyección evidente.</text>
+<rect x="2110" y="1250" width="560" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1271.05" font-size="13" fill="#e5e7eb">server.js:27-31 y 43-47</text>
+<rect x="2670" y="1250" width="130" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1271.05" font-size="13" fill="#e5e7eb">Confirmada</text>
+<rect x="2800" y="1250" width="360" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1271.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (4)</text>
+<rect x="40" y="1283" width="70" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1304.05" font-size="13" fill="#e5e7eb" font-weight="bold">T3</text>
+<rect x="110" y="1283" width="150" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1304.05" font-size="13" fill="#e5e7eb">Tampering</text>
+<rect x="260" y="1283" width="380" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1304.05" font-size="13" fill="#e5e7eb">P3 API Express · CORS</text>
+<rect x="640" y="1283" width="1470" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1304.05" font-size="13" fill="#e5e7eb">cors() sin opciones responde Access-Control-Allow-Origin: *; cualquier sitio puede invocar la API desde el navegador de la víctima.</text>
+<rect x="2110" y="1283" width="560" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1304.05" font-size="13" fill="#e5e7eb">server.js:6</text>
+<rect x="2670" y="1283" width="130" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1304.05" font-size="13" fill="#e5e7eb">Confirmada</text>
+<rect x="2800" y="1283" width="360" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1304.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (4)</text>
+<rect x="40" y="1316" width="70" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1337.05" font-size="13" fill="#e5e7eb" font-weight="bold">T4</text>
+<rect x="110" y="1316" width="150" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1337.05" font-size="13" fill="#e5e7eb">Tampering</text>
+<rect x="260" y="1316" width="380" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1337.05" font-size="13" fill="#e5e7eb">P1 Nginx · F1 y F2</text>
+<rect x="640" y="1316" width="1470" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1337.05" font-size="13" fill="#e5e7eb">Tráfico HTTP sin TLS y sin cabeceras de seguridad (CSP, X-Frame-Options): respuestas manipulables en tránsito, clickjacking.</text>
+<rect x="2110" y="1316" width="560" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1337.05" font-size="13" fill="#e5e7eb">nginx.conf: listen 8081, sin ssl ni add_header</text>
+<rect x="2670" y="1316" width="130" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1337.05" font-size="13" fill="#e5e7eb">Confirmada</text>
+<rect x="2800" y="1316" width="360" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1337.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (4)</text>
+<rect x="40" y="1349" width="70" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1370.05" font-size="13" fill="#e5e7eb" font-weight="bold">T5</text>
+<rect x="110" y="1349" width="150" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1370.05" font-size="13" fill="#e5e7eb">Tampering</text>
+<rect x="260" y="1349" width="380" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1370.05" font-size="13" fill="#e5e7eb">P6 / DS4 · cadena de suministro</text>
+<rect x="640" y="1349" width="1470" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1370.05" font-size="13" fill="#e5e7eb">Imágenes base por tag (no digest) y dependencias npm pueden alterar el artefacto. Control: package-lock + npm ci.</text>
+<rect x="2110" y="1349" width="560" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1370.05" font-size="13" fill="#e5e7eb">Dockerfiles (FROM) y compose.yaml (image)</text>
+<rect x="2670" y="1349" width="130" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1370.05" font-size="13" fill="#e5e7eb">Confirmada</text>
+<rect x="2800" y="1349" width="360" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1370.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (3)</text>
+<rect x="40" y="1382" width="70" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1403.05" font-size="13" fill="#e5e7eb" font-weight="bold">R1</text>
+<rect x="110" y="1382" width="150" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1403.05" font-size="13" fill="#e5e7eb">Repudiation</text>
+<rect x="260" y="1382" width="380" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1403.05" font-size="13" fill="#e5e7eb">P3 API Express</text>
+<rect x="640" y="1382" width="1470" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1403.05" font-size="13" fill="#e5e7eb">Escrituras y borrados no registran quién, cuándo ni desde dónde; no hay log de auditoría en la aplicación.</text>
+<rect x="2110" y="1382" width="560" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1403.05" font-size="13" fill="#e5e7eb">server.js: solo console.log al iniciar</text>
+<rect x="2670" y="1382" width="130" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1403.05" font-size="13" fill="#e5e7eb">Confirmada</text>
+<rect x="2800" y="1382" width="360" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1403.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (4)</text>
+<rect x="40" y="1415" width="70" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1436.05" font-size="13" fill="#e5e7eb" font-weight="bold">I1</text>
+<rect x="110" y="1415" width="150" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1436.05" font-size="13" fill="#e5e7eb">Info. Disclosure</text>
+<rect x="260" y="1415" width="380" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1436.05" font-size="13" fill="#e5e7eb">P3 · respuestas HTTP 500</text>
+<rect x="640" y="1415" width="1470" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1436.05" font-size="13" fill="#e5e7eb">El catch devuelve err.message: un error de PostgreSQL (p. ej. GET /api/notes/abc) revela detalles del motor.</text>
+<rect x="2110" y="1415" width="560" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1436.05" font-size="13" fill="#e5e7eb">server.js:22, 38, 59 y 71</text>
+<rect x="2670" y="1415" width="130" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1436.05" font-size="13" fill="#e5e7eb">Confirmada</text>
+<rect x="2800" y="1415" width="360" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1436.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (3)</text>
+<rect x="40" y="1448" width="70" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1469.05" font-size="13" fill="#e5e7eb" font-weight="bold">I2</text>
+<rect x="110" y="1448" width="150" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1469.05" font-size="13" fill="#e5e7eb">Info. Disclosure</text>
+<rect x="260" y="1448" width="380" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1469.05" font-size="13" fill="#e5e7eb">DS3 pg_password.txt</text>
+<rect x="640" y="1448" width="1470" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1469.05" font-size="13" fill="#e5e7eb">Contraseña en archivo plano en el host, legible con acceso al host. Control: fuera de Git e imágenes (Docker secret).</text>
+<rect x="2110" y="1448" width="560" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1469.05" font-size="13" fill="#e5e7eb">compose.yaml: secrets · .gitignore</text>
+<rect x="2670" y="1448" width="130" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1469.05" font-size="13" fill="#e5e7eb">Mitigada</text>
+<rect x="2800" y="1448" width="360" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1469.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (3)</text>
+<rect x="40" y="1481" width="70" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1502.05" font-size="13" fill="#e5e7eb" font-weight="bold">I3</text>
+<rect x="110" y="1481" width="150" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1502.05" font-size="13" fill="#e5e7eb">Info. Disclosure</text>
+<rect x="260" y="1481" width="380" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1502.05" font-size="13" fill="#e5e7eb">F5/F6 · P4 ↔ P5</text>
+<rect x="640" y="1481" width="1470" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1502.05" font-size="13" fill="#e5e7eb">Conexión a PostgreSQL sin TLS; el riesgo queda acotado a la red private (internal).</text>
+<rect x="2110" y="1481" width="560" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1502.05" font-size="13" fill="#e5e7eb">db.js: Pool sin opción ssl</text>
+<rect x="2670" y="1481" width="130" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1502.05" font-size="13" fill="#e5e7eb">Candidata</text>
+<rect x="2800" y="1481" width="360" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1502.05" font-size="13" fill="#a3e635" font-weight="bold">Bajo (2)</text>
+<rect x="40" y="1514" width="70" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1535.05" font-size="13" fill="#e5e7eb" font-weight="bold">I4</text>
+<rect x="110" y="1514" width="150" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1535.05" font-size="13" fill="#e5e7eb">Info. Disclosure</text>
+<rect x="260" y="1514" width="380" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1535.05" font-size="13" fill="#e5e7eb">DS2 postgres-data</text>
+<rect x="640" y="1514" width="1470" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1535.05" font-size="13" fill="#e5e7eb">Volumen sin cifrado en reposo; depende del cifrado de disco del host.</text>
+<rect x="2110" y="1514" width="560" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1535.05" font-size="13" fill="#e5e7eb">compose.yaml: volumen local postgres-data</text>
+<rect x="2670" y="1514" width="130" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1535.05" font-size="13" fill="#e5e7eb">Candidata</text>
+<rect x="2800" y="1514" width="360" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1535.05" font-size="13" fill="#a3e635" font-weight="bold">Bajo (2)</text>
+<rect x="40" y="1547" width="70" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1568.05" font-size="13" fill="#e5e7eb" font-weight="bold">D1</text>
+<rect x="110" y="1547" width="150" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1568.05" font-size="13" fill="#e5e7eb">Denial of Service</text>
+<rect x="260" y="1547" width="380" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1568.05" font-size="13" fill="#e5e7eb">P2 proxy / P3 API</text>
+<rect x="640" y="1547" width="1470" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1568.05" font-size="13" fill="#e5e7eb">Ráfagas de peticiones o notas muy grandes saturan backend o disco: sin limit_req ni límite de longitud en content.</text>
+<rect x="2110" y="1547" width="560" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1568.05" font-size="13" fill="#e5e7eb">nginx.conf · server.js:7 (express.json por defecto)</text>
+<rect x="2670" y="1547" width="130" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1568.05" font-size="13" fill="#e5e7eb">Confirmada</text>
+<rect x="2800" y="1547" width="360" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1568.05" font-size="13" fill="#ef4444" font-weight="bold">Alto (6)</text>
+<rect x="40" y="1580" width="70" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1601.05" font-size="13" fill="#e5e7eb" font-weight="bold">D2</text>
+<rect x="110" y="1580" width="150" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1601.05" font-size="13" fill="#e5e7eb">Denial of Service</text>
+<rect x="260" y="1580" width="380" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1601.05" font-size="13" fill="#e5e7eb">P4 Gestor de conexiones</text>
+<rect x="640" y="1580" width="1470" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1601.05" font-size="13" fill="#e5e7eb">pg.Pool con valores por defecto (máx. 10 conexiones, sin timeout): consultas lentas agotan el pool.</text>
+<rect x="2110" y="1580" width="560" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1601.05" font-size="13" fill="#e5e7eb">db.js:15-21</text>
+<rect x="2670" y="1580" width="130" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1601.05" font-size="13" fill="#e5e7eb">Candidata</text>
+<rect x="2800" y="1580" width="360" height="33" fill="#111a2e" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1601.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (4)</text>
+<rect x="40" y="1613" width="70" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="48" y="1634.05" font-size="13" fill="#e5e7eb" font-weight="bold">E1</text>
+<rect x="110" y="1613" width="150" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="118" y="1634.05" font-size="13" fill="#e5e7eb">Elevation of Priv.</text>
+<rect x="260" y="1613" width="380" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="268" y="1634.05" font-size="13" fill="#e5e7eb">P5 PostgreSQL (rol moonuser)</text>
+<rect x="640" y="1613" width="1470" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="648" y="1634.05" font-size="13" fill="#e5e7eb">POSTGRES_USER crea un superusuario; si se compromete el backend, el atacante controla toda la base de datos.</text>
+<rect x="2110" y="1613" width="560" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2118" y="1634.05" font-size="13" fill="#e5e7eb">compose.yaml: POSTGRES_USER · imagen oficial postgres</text>
+<rect x="2670" y="1613" width="130" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2678" y="1634.05" font-size="13" fill="#e5e7eb">Candidata</text>
+<rect x="2800" y="1613" width="360" height="33" fill="#0e1626" stroke="#334155" stroke-width="1"/>
+<text x="2808" y="1634.05" font-size="13" fill="#f59e0b" font-weight="bold">Medio (3)</text>
+</svg>

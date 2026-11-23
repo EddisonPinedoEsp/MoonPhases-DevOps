@@ -1,0 +1,468 @@
+
+\chapter{Modelado de amenazas mediante STRIDE}
+
+\section{Metodología STRIDE}
+
+STRIDE es una metodología de modelado de amenazas propuesta por Microsoft
+\cite{stride}. Parte de un diagrama de flujo de datos (DFD) del sistema y
+revisa cada elemento del diagrama (actores externos, procesos, almacenes de
+datos y flujos) frente a seis categorías de amenaza. Cada categoría
+corresponde a la violación de una propiedad de seguridad: autenticidad,
+integridad, no repudio, confidencialidad, disponibilidad y autorización.
+
+En MoonPhases se aplicó en cuatro pasos:
+
+\begin{enumerate}
+    \item \textbf{Verificación de la arquitectura} contra el repositorio
+    (\texttt{compose.yaml}, \texttt{nginx.conf}, \texttt{server.js},
+    \texttt{db.js} y los \texttt{Dockerfile}), para no modelar componentes
+    que no existen.
+    \item \textbf{Construcción del DFD} con actores, procesos, almacenes,
+    flujos y límites de confianza (\textit{Trust Boundaries}).
+    \item \textbf{Evaluación por elemento:} para cada componente o flujo
+    se consideró qué categorías STRIDE le son aplicables. No se asumió que
+    toda la aplicación sea vulnerable a las seis categorías.
+    \item \textbf{Clasificación de cada amenaza} por su estado
+    (\textit{confirmada}, \textit{candidata} o \textit{mitigada}) y por su
+    nivel de riesgo, calculado como impacto por probabilidad.
+\end{enumerate}
+
+Las seis categorías consideradas son:
+
+\begin{table}[H]
+\centering
+\caption{Categorías de amenazas STRIDE.}
+\label{tab:stride}
+
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Categoría} &
+\textbf{Abreviatura} &
+\textbf{Descripción} \\
+\midrule
+Suplantación de identidad & S &
+Suplantación de una entidad legítima. \\
+
+Manipulación de datos & T &
+Modificación no autorizada de información. \\
+
+Repudio & R &
+Negación de acciones realizadas. \\
+
+Divulgación de información & I &
+Acceso no autorizado a información. \\
+
+Denegación de servicio & D &
+Interrupción de la disponibilidad. \\
+
+Elevación de privilegios & E &
+Obtención de permisos superiores. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Criterio de riesgo}
+
+El nivel de riesgo no se asignó de forma arbitraria. Se calculó como
+\textbf{riesgo = impacto $\times$ probabilidad}, con ambos factores en una
+escala de 1 a 3:
+
+\begin{table}[H]
+\centering
+\caption{Escalas utilizadas para calcular el riesgo.}
+\label{tab:criterio-riesgo}
+
+\begin{tabularx}{\textwidth}{c X X}
+\toprule
+\textbf{Valor} &
+\textbf{Impacto} &
+\textbf{Probabilidad} \\
+\midrule
+1 &
+Facilita otros ataques; no hay pérdida directa. &
+Requiere acceso previo (host, cuenta o compromiso del backend). \\
+
+2 &
+Degradación del servicio o pérdida parcial de datos. &
+Requiere una condición adicional (estar en la ruta de red, un sitio
+visitado por la víctima, etc.). \\
+
+3 &
+Alteración o pérdida total de los datos, o control del componente. &
+Explotable hoy desde la red, sin precondiciones. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Un puntaje de 1 a 2 se considera \textbf{bajo}, de 3 a 4 \textbf{medio} y de
+6 a 9 \textbf{alto}. Las amenazas se clasifican además por su estado:
+\textit{confirmada} cuando hay evidencia directa en el código o en la
+configuración, \textit{candidata} cuando depende de una condición que no se
+ha verificado, y \textit{mitigada} cuando existe un control con riesgo
+residual.
+
+\section{Diagrama de modelado de amenazas}
+
+La figura~\ref{fig:stride} presenta el diagrama de flujo de datos con el
+análisis STRIDE, elaborado en draw.io. Muestra únicamente la arquitectura
+actual del sistema, verificada contra el repositorio. Las mitigaciones
+propuestas se describen en el capítulo de hallazgos y no aparecen dibujadas.
+El archivo editable (\texttt{.drawio}) y la matriz completa de amenazas se
+encuentran en \texttt{docs/stride/}.
+
+\begin{landscape}
+\evidencefigure
+{figures/stride.pdf}
+{Diagrama de flujo de datos de MoonPhases con el análisis STRIDE.}
+{fig:stride}
+\end{landscape}
+
+\subsection{Actores y componentes}
+
+\begin{itemize}
+    \item \textbf{Actores externos:} el usuario legítimo, que accede desde un
+    navegador; el atacante externo, que puede intentar explotar la
+    aplicación por el camino normal o directamente; y el desarrollador, que
+    administra el repositorio de GitHub.
+    \item \textbf{Procesos:} el navegador con la aplicación de Three.js (P0);
+    Nginx sirviendo el frontend estático (P1); el mismo Nginx como proxy
+    inverso de \texttt{/api/} (P2); la API REST de Express (P3); el gestor
+    de conexiones \texttt{pg.Pool} (P4); el servidor PostgreSQL (P5); y el
+    repositorio de GitHub (P6).
+    \item \textbf{Almacenes de datos y activos:} la tabla
+    \texttt{moon\_notes} (DS1), el volumen persistente
+    \texttt{postgres-data} (DS2), el archivo \texttt{pg\_password.txt} con el
+    secreto montado en los contenedores (DS3) y el código fuente (DS4).
+\end{itemize}
+
+Durante la verificación se corrigió un dato: el frontend publica el puerto
+\textbf{8081}, no el 8080. Lo confirman \texttt{listen 8081} en
+\texttt{nginx.conf} y \texttt{8081:8081} en \texttt{compose.yaml}. El backend
+escucha en el 3001 y PostgreSQL en el 5432, solo dentro de la red privada.
+No se dibujaron servicios que el proyecto no implementa.
+
+\subsection{Flujos de datos}
+
+\begin{table}[H]
+\centering
+\caption{Flujos de datos representados en el diagrama.}
+\label{tab:flujos}
+
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Flujo} &
+\textbf{Descripción} \\
+\midrule
+F1, F2 &
+El navegador solicita la aplicación a Nginx por HTTP (puerto 8081) y
+recibe la aplicación estática y las respuestas. \\
+
+F3 &
+El navegador envía las operaciones sobre notas al proxy mediante
+\texttt{/api/}. \\
+
+F4 &
+Nginx reenvía la solicitud a Express con \texttt{proxy\_pass}. \\
+
+F5, F6 &
+Express consulta PostgreSQL con SQL parametrizado, sin TLS, y recibe los
+resultados a través del pool de conexiones. \\
+
+F7 &
+Docker Compose entrega la contraseña de PostgreSQL al backend y a la base de
+datos como archivo montado. \\
+
+F8 &
+El desarrollador sube código al repositorio de GitHub. \\
+
+F9 &
+El atacante intenta llegar a la API por el camino normal (Nginx). \\
+
+F10 &
+El atacante accede directamente al puerto 3001, publicado en el host por
+\texttt{compose.yaml}. Se dibuja en rojo porque evita el control de Nginx.
+Es un flujo confirmado en la configuración, no una suposición. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Límites de confianza}
+
+\begin{table}[H]
+\centering
+\caption{Trust Boundaries del modelo.}
+\label{tab:tb}
+
+\begin{tabularx}{\textwidth}{l X l}
+\toprule
+\textbf{ID} &
+\textbf{Qué separa} &
+\textbf{Tipo} \\
+\midrule
+TB1 & Internet y navegador frente al servidor de la aplicación. &
+Red \\
+
+TB2 & Red Docker pública, donde están Nginx y Express. &
+Red \\
+
+TB3 & Red Docker privada (\texttt{internal: true}), donde Express se
+comunica con PostgreSQL. &
+Red \\
+
+TB4 & Entorno de desarrollo y repositorio de GitHub. &
+Lógica \\
+
+TB5 & Acceso a los secretos y al almacenamiento persistente del host. &
+Lógica \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+TB1 a TB3 corresponden a fronteras de red reales. TB4 y TB5 son zonas
+lógicas: no son redes, pero delimitan quién puede acceder al repositorio y a
+los archivos del host. El backend pertenece a la red pública y también está
+conectado a la privada; en el diagrama se ubica en TB2 y el flujo F5 cruza
+hacia TB3.
+
+\subsection{Ubicación de las amenazas}
+
+Cada amenaza se dibuja junto al componente o flujo que afecta. Se agrupan en
+Express (P3) las que dependen de su código (autenticación, validación, CORS,
+errores y registro), y en Nginx (P1 y P2) las del canal y los límites de
+tasa. La amenaza S2 se dibuja sobre el flujo F10 porque la amenaza es el
+camino mismo. Las demás se colocan en el almacén o proceso afectado. El color
+del círculo indica el nivel de riesgo y el contorno discontinuo indica que la
+amenaza es candidata o está mitigada, no confirmada.
+
+\section{Principales amenazas identificadas}
+
+El modelado identificó 16 amenazas. Las cinco más relevantes (seis
+identificadores, porque la primera agrupa S1 y T1) se presentan a
+continuación, ordenadas por riesgo y por el respaldo que tienen en el código
+y en las herramientas. Para cada una se indica si es una vulnerabilidad
+\textbf{confirmada por herramientas} o solo una amenaza deducida del código y
+de la configuración. El resto se resume al final de esta sección.
+
+% ------------------------------------------------------------
+% AMENAZA 1
+% ------------------------------------------------------------
+
+\subsection{Amenaza 1 (S1 y T1): API sin autenticación ni autorización}
+
+\begin{itemize}
+    \item \textbf{Categoría STRIDE:} Suplantación (S) y Manipulación (T).
+    \item \textbf{Componente afectado:} API REST de Express (P3) y tabla
+    \texttt{moon\_notes} (DS1).
+    \item \textbf{Descripción:} ninguna ruta verifica la identidad de quien
+    llama. Cualquier cliente que alcance la API puede listar, crear,
+    sobrescribir (\texttt{POST} hace un \textit{upsert}) y borrar la nota de
+    cualquier fecha. El propio esquema de la base de datos declara ``sin
+    autenticación de usuario''.
+    \item \textbf{Impacto:} alteración o pérdida de los datos del diario.
+    Cualquier visitante actúa con el máximo privilegio disponible.
+    \item \textbf{Estado y evidencia:} confirmada por revisión del código
+    (\texttt{server.js}, \texttt{schema.sql}). Riesgo \textbf{alto (9)}:
+    impacto 3 por probabilidad 3. ZAP, además, accede a \texttt{/api/notes}
+    sin credenciales, lo que es coherente con la amenaza, aunque el escaneo
+    pasivo no intenta modificar datos.
+    \item \textbf{Mitigación:} añadir autenticación (sesión o JWT) y
+    autorización por recurso. Como mínimo, proteger \texttt{POST} y
+    \texttt{DELETE} con un token.
+\end{itemize}
+
+% ------------------------------------------------------------
+% AMENAZA 2
+% ------------------------------------------------------------
+
+\subsection{Amenaza 2 (D1): ausencia de límites de tasa y de tamaño}
+
+\begin{itemize}
+    \item \textbf{Categoría STRIDE:} Denegación de servicio (D).
+    \item \textbf{Componente afectado:} proxy inverso de Nginx (P2) y API
+    de Express (P3).
+    \item \textbf{Descripción:} no hay \texttt{limit\_req} en Nginx ni límite
+    de longitud para el campo \texttt{content}. Solo rigen los valores por
+    defecto de Nginx (1~MB por cuerpo) y de \texttt{express.json()}
+    (100~KB). Un cliente puede enviar ráfagas de peticiones o notas grandes
+    en bucle.
+    \item \textbf{Impacto:} saturación del backend, del pool de conexiones o
+    del volumen de PostgreSQL.
+    \item \textbf{Estado y evidencia:} confirmada por revisión de
+    \texttt{nginx.conf} y \texttt{server.js}. Ninguna de las herramientas
+    implementadas la detecta, porque no hay una prueba de carga contra el
+    servicio. Riesgo \textbf{alto (6)}: impacto 2 por probabilidad 3.
+    \item \textbf{Mitigación:} \texttt{limit\_req} y
+    \texttt{client\_max\_body\_size} en Nginx, y validación de la longitud de
+    \texttt{content} en Express.
+\end{itemize}
+
+% ------------------------------------------------------------
+% AMENAZA 3
+% ------------------------------------------------------------
+
+\subsection{Amenaza 3 (T3): CORS abierto a cualquier origen}
+
+\begin{itemize}
+    \item \textbf{Categoría STRIDE:} Manipulación (T).
+    \item \textbf{Componente afectado:} API de Express (P3).
+    \item \textbf{Descripción:} \texttt{app.use(cors())} sin opciones
+    responde \texttt{Access-Control-Allow-Origin: *}. Cualquier sitio web
+    que visite el usuario puede invocar la API desde su navegador.
+    \item \textbf{Impacto:} lectura y escritura de notas desde páginas de
+    terceros, favorecida por la falta de autenticación (amenaza 1).
+    \item \textbf{Estado y evidencia:} \textbf{confirmada por herramienta}.
+    OWASP ZAP la reporta como \textit{Cross-Domain Misconfiguration}, con la
+    cabecera \texttt{Access-Control-Allow-Origin: *} en \texttt{/api/}.
+    Riesgo \textbf{medio (4)}.
+    \item \textbf{Mitigación:} \texttt{cors(\{ origin: <origen del
+    frontend> \})}.
+\end{itemize}
+
+% ------------------------------------------------------------
+% AMENAZA 4
+% ------------------------------------------------------------
+
+\subsection{Amenaza 4 (I1): divulgación de información en errores}
+
+\begin{itemize}
+    \item \textbf{Categoría STRIDE:} Divulgación de información (I).
+    \item \textbf{Componente afectado:} API de Express (P3), respuestas
+    HTTP 500.
+    \item \textbf{Descripción:} los cuatro bloques \texttt{catch} devuelven
+    \texttt{err.message} al cliente. Un error de PostgreSQL, por ejemplo con
+    una fecha mal formada, revela detalles del motor.
+    \item \textbf{Impacto:} facilita el reconocimiento de la aplicación y
+    ataques posteriores. No da acceso directo a los datos.
+    \item \textbf{Estado y evidencia:} confirmada por revisión del código y
+    \textbf{respaldada por herramienta}: ZAP detectó una respuesta
+    \texttt{500 Internal Server Error} en \texttt{/api/notes}
+    (\textit{Application Error Disclosure}) y la cabecera
+    \texttt{X-Powered-By: Express}, que revela la tecnología del backend.
+    Riesgo \textbf{medio (3)}: impacto 1 por probabilidad 3.
+    \item \textbf{Mitigación:} registrar el error completo en el servidor,
+    responder con un mensaje genérico y desactivar \texttt{X-Powered-By}.
+\end{itemize}
+
+% ------------------------------------------------------------
+% AMENAZA 5
+% ------------------------------------------------------------
+
+\subsection{Amenaza 5 (T4): canal sin TLS y sin cabeceras de seguridad}
+
+\begin{itemize}
+    \item \textbf{Categoría STRIDE:} Manipulación (T).
+    \item \textbf{Componente afectado:} Nginx (P1) y los flujos F1 y F2.
+    \item \textbf{Descripción:} el tráfico viaja por HTTP sin TLS y Nginx no
+    envía cabeceras de seguridad. Las respuestas pueden manipularse en
+    tránsito y la aplicación puede incrustarse en un \texttt{iframe}
+    (\textit{clickjacking}).
+    \item \textbf{Impacto:} alteración del contenido que recibe el usuario y
+    ausencia de políticas que limiten la ejecución de scripts.
+    \item \textbf{Estado y evidencia:} \textbf{confirmada por herramienta}.
+    ZAP reporta la ausencia de \textit{Content Security Policy},
+    \textit{Anti-clickjacking Header} y \textit{X-Content-Type-Options}.
+    Además, marca la versión de Nginx como vulnerable
+    (\textit{nginx Version with Known Vulnerabilities}). Riesgo \textbf{medio
+    (4)}.
+    \item \textbf{Mitigación:} TLS en Nginx, cabeceras CSP,
+    \texttt{X-Frame-Options}, \texttt{X-Content-Type-Options},
+    \texttt{Referrer-Policy} y HSTS, y actualizar la imagen de Nginx.
+\end{itemize}
+
+\subsection{Otras amenazas del modelo}
+
+Las diez amenazas restantes tienen un riesgo menor o dependen de
+condiciones que no se han verificado. Se resumen en la
+tabla~\ref{tab:otras-amenazas}.
+
+\begin{table}[H]
+\centering
+\caption{Otras amenazas identificadas en el modelo.}
+\label{tab:otras-amenazas}
+
+\begin{tabularx}{\textwidth}{l l X l l}
+\toprule
+\textbf{ID} &
+\textbf{Categoría} &
+\textbf{Amenaza} &
+\textbf{Estado} &
+\textbf{Riesgo} \\
+\midrule
+S2 & S & Puerto 3001 publicado: se accede al backend sin pasar por Nginx. &
+Confirmada & Medio (3) \\
+
+S3 & S & Cuenta del desarrollador comprometida; \texttt{main} exige 1
+revisión por PR. & Mitigada & Medio (3) \\
+
+T2 & T & \texttt{:date} y \texttt{content} sin validar; el SQL
+parametrizado evita la inyección. & Confirmada & Medio (4) \\
+
+T5 & T & Imágenes base por tag, no por digest (cadena de suministro). &
+Confirmada & Medio (3) \\
+
+R1 & R & Escrituras y borrados sin registro de auditoría. &
+Confirmada & Medio (4) \\
+
+I2 & I & Contraseña en archivo plano en el host (Docker secret). &
+Mitigada & Medio (3) \\
+
+I3 & I & Conexión a PostgreSQL sin TLS, en red interna. &
+Candidata & Bajo (2) \\
+
+I4 & I & Volumen \texttt{postgres-data} sin cifrado en reposo. &
+Candidata & Bajo (2) \\
+
+D2 & D & \texttt{pg.Pool} con valores por defecto, sin timeouts. &
+Candidata & Medio (4) \\
+
+E1 & E & El rol \texttt{moonuser} es superusuario en la imagen oficial de
+PostgreSQL. & Candidata & Medio (3) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+En la API no hay escalamiento de privilegios porque no existen roles:
+quien llega a ella ya tiene el máximo permiso, y eso se recoge en la
+amenaza 1 (S1 y T1). Por eso la única amenaza de elevación de privilegios
+es E1, condicionada a que el backend ya esté comprometido.
+
+Existen también controles que reducen el riesgo y deben conservarse:
+consultas SQL parametrizadas, PostgreSQL sin publicar en el host y en una
+red interna, procesos sin permisos de administrador, contraseña como Docker
+secret fuera de Git, dependencias fijadas por lockfile y protección de la
+rama \texttt{main}.
+
+\section{Resumen de amenazas}
+
+\begin{table}[H]
+\centering
+\caption{Resumen de las principales amenazas STRIDE.}
+\label{tab:amenazas-principales}
+
+\begin{tabularx}{\textwidth}{c l X l}
+\toprule
+\textbf{ID} &
+\textbf{Categoría} &
+\textbf{Amenaza} &
+\textbf{Prioridad} \\
+\midrule
+S1, T1 & Suplantación y Manipulación &
+API sin autenticación ni autorización: cualquiera lee, crea, modifica y
+borra notas. (Confirmada en código) & Alta \\
+
+D1 & Denegación de servicio &
+Sin límites de tasa ni de tamaño de contenido. (Confirmada en código) &
+Alta \\
+
+T3 & Manipulación &
+CORS abierto a cualquier origen. (Confirmada por ZAP) & Media \\
+
+I1 & Divulgación de información &
+Errores internos y tecnología expuestos en las respuestas HTTP.
+(Confirmada en código y respaldada por ZAP) & Media \\
+
+T4 & Manipulación &
+HTTP sin TLS y sin cabeceras de seguridad. (Confirmada por ZAP) & Media \\
+\bottomrule
+\end{tabularx}
+\end{table}

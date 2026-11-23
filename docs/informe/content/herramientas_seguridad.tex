@@ -1,0 +1,329 @@
+
+\chapter{Herramientas de seguridad implementadas}
+
+Las herramientas se eligieron a partir de las amenazas del modelo STRIDE:
+cada una debía cubrir al menos una amenaza, funcionar con el stack del
+proyecto (Node.js, Express, Vite, Docker y PostgreSQL), ejecutarse en GitHub
+Actions o en local sin infraestructura adicional y ser gratuita. Los scripts
+de ejecución se encuentran en \texttt{scripts/security/} y generan sus
+reportes en \texttt{reports/}. Los resultados que se presentan en este
+capítulo provienen de la ejecución real del pipeline en GitHub Actions
+(23 de noviembre de 2026, rama
+\url{feature/devsecops-threat-model-sast-dast}) y de los reportes de ZAP
+generados en local.
+
+% ============================================================
+% SAST
+% ============================================================
+
+\section{Análisis estático de seguridad (SAST)}
+
+\subsection{Herramienta seleccionada}
+
+Se utilizó \textbf{Semgrep} en su versión de línea de comandos con reglas de
+la comunidad. Se eligió porque es rápido, tiene reglas para JavaScript,
+TypeScript, Dockerfile y archivos de configuración, no requiere cuenta ni
+servidor propio y se ejecuta en cada \textit{push}. Su objetivo es detectar
+patrones inseguros en el código fuente antes de que lleguen a ejecución.
+
+En la fase de selección se evaluó también SonarCloud como complemento, pero
+no se integró en el pipeline actual; Semgrep es el único análisis estático
+implementado.
+
+\subsection{Configuración e integración}
+
+El script \texttt{scripts/security/run-semgrep.sh} ejecuta la imagen oficial
+\texttt{semgrep/semgrep} en un contenedor, con tres conjuntos de reglas:
+\texttt{p/ci}, \texttt{p/security-audit} y \texttt{p/javascript}. Se
+desactivan las métricas (\texttt{-{}-metrics=off}), se excluye la carpeta
+\texttt{reports} y el resultado se guarda en formato JSON en
+\texttt{reports/sast/semgrep-report.json}.
+
+En GitHub Actions, el job \texttt{semgrep-scan} ejecuta el script después de
+los jobs de detección de secretos (\texttt{needs}) y publica el reporte como
+\textit{artifact}. El paso corre con \texttt{continue-on-error}, de modo que
+un hallazgo no impide que el reporte llegue a DefectDojo.
+
+\begin{lstlisting}[language=yaml, caption={Job de Semgrep en el pipeline.}, label={lst:semgrep}]
+semgrep-scan:
+  needs: [gitleaks-scan, trufflehog-scan]
+  runs-on: ubuntu-latest
+  steps:
+    - uses: actions/checkout@v4
+    - name: Semgrep
+      continue-on-error: true
+      run: bash scripts/security/run-semgrep.sh
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: reports-semgrep
+        path: reports/sast/semgrep-report.json
+\end{lstlisting}
+
+\subsection{Resultados obtenidos}
+
+Semgrep analizó 68 archivos versionados con 122 reglas y reportó
+\textbf{15 hallazgos}, todos con la misma regla
+(\texttt{github-actions-mutable-action-tag}, severidad \textit{WARNING},
+CWE-1357). Los 15 corresponden a acciones de GitHub referenciadas por una
+etiqueta mutable (por ejemplo \texttt{actions/checkout@v4}) en el archivo
+\texttt{.github/workflows/pipeline.yml}, en lugar de fijarlas por el
+\textit{hash} del commit. Es un riesgo de cadena de suministro: si la
+etiqueta se redirige a código malicioso, el pipeline lo ejecutaría.
+
+\textbf{No se detectaron hallazgos en el código de la aplicación}
+(\texttt{backend/src} y \texttt{frontend/src}). Esto no significa que el
+código esté libre de problemas: las reglas estándar no detectaron el CORS
+abierto (\texttt{cors()}) ni la devolución de \texttt{err.message}, que sí
+están confirmados por otras vías (capítulo de modelado de amenazas). Para
+cubrirlos haría falta escribir reglas propias de Semgrep, lo cual queda como
+mejora pendiente.
+
+% ============================================================
+% DAST
+% ============================================================
+
+\section{Análisis dinámico de seguridad (DAST)}
+
+\subsection{Herramienta seleccionada}
+
+Se utilizó \textbf{OWASP ZAP} en modo \textit{baseline}. ZAP es gratuito, de
+código abierto, dispone de imágenes oficiales para Docker y su escaneo
+\textit{baseline} es \textbf{pasivo}: observa las respuestas de la aplicación
+sin enviar ataques, por lo que es seguro ejecutarlo contra el entorno local.
+
+\subsection{Configuración e integración}
+
+El script \texttt{scripts/security/run-zap-baseline.sh} ejecuta la imagen
+\texttt{zaproxy/zap-stable} dentro de la misma red de Docker Compose que la
+aplicación, por lo que el objetivo se indica con el nombre del servicio
+(\texttt{frontend}). Se realizaron dos escaneos: uno sobre la aplicación web
+y otro sobre el endpoint de la API (\texttt{/api/notes}). Cada uno genera
+reportes en HTML, JSON y XML en \texttt{reports/dast/}.
+
+{\sloppy
+Las alertas se evalúan con el archivo \texttt{zap/rules.conf}, que define
+una puerta de calidad (\textit{gate}): las alertas de \textit{Content
+Security Policy} ausente, \textit{Anti-clickjacking}, \textit{X-Content-Type-Options},
+\textit{Strict-Transport-Security} y \textit{Cross-Domain Misconfiguration}
+tienen acción \texttt{FAIL}; otras, como \textit{Permissions Policy}, solo
+generan aviso (\texttt{WARN}); y el contenido cacheable se ignora.
+\par}
+
+Este análisis \textbf{se ejecuta en local} y requiere que la aplicación esté
+levantada con \texttt{docker compose}. Todavía no forma parte del pipeline de
+GitHub Actions, porque exigiría levantar el stack completo dentro del
+\textit{runner}.
+
+\subsection{Resultados obtenidos}
+
+\begin{table}[H]
+\centering
+\caption{Alertas de ZAP por nivel de riesgo (tipos de alerta).}
+\label{tab:zap-resumen}
+
+\begin{tabularx}{\textwidth}{l c c c c c}
+\toprule
+\textbf{Escaneo} &
+\textbf{Alto} &
+\textbf{Medio} &
+\textbf{Bajo} &
+\textbf{Informativo} &
+\textbf{Total} \\
+\midrule
+Aplicación web & 1 & 2 & 7 & 3 & 13 \\
+API (\texttt{/api/notes}) & 1 & 4 & 9 & 3 & 17 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Las alertas más relevantes y su relación con el modelo de amenazas son:
+
+\begin{table}[H]
+\centering
+\caption{Alertas principales de ZAP y amenaza asociada.}
+\label{tab:zap-alertas}
+
+\begin{tabularx}{\textwidth}{l X l}
+\toprule
+\textbf{Riesgo} &
+\textbf{Alerta} &
+\textbf{Amenaza} \\
+\midrule
+Alto & \textit{nginx Version with Known Vulnerabilities}: el encabezado
+\texttt{Server} revela una versión de Nginx con vulnerabilidades conocidas. &
+T4 \\
+
+Medio & \textit{Content Security Policy (CSP) Header Not Set}. & T4 \\
+
+Medio & \textit{Missing Anti-clickjacking Header}. & T4 \\
+
+Medio & \textit{Cross-Domain Misconfiguration}: la API responde
+\texttt{Access-Control-Allow-Origin: *}. & T3 \\
+
+Bajo & \textit{Application Error Disclosure}: respuesta HTTP 500 en
+\texttt{/api/notes}. & I1 \\
+
+Bajo & \textit{X-Powered-By} y \textit{Server} revelan Express y la versión de
+Nginx. & I1 \\
+
+Bajo & \textit{X-Content-Type-Options Header Missing}. & T4 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Las alertas con acción \texttt{FAIL} (CSP, anti-clickjacking,
+\textit{X-Content-Type-Options} y \textit{Cross-Domain Misconfiguration})
+aparecen en los resultados, por lo que el \textit{gate} de ZAP no se
+supera. ZAP confirma así tres amenazas del modelo (T3, T4 e I1) y añade dos
+hallazgos que el modelo no había identificado: la versión de Nginx vulnerable
+y la exposición de la tecnología del servidor.
+
+La figura~\ref{fig:dast} muestra el resumen del reporte de ZAP para el
+escaneo de la API.
+
+\evidencefigure
+{figures/dast-reporte.png}
+{Resumen del reporte de OWASP ZAP para la API: 1 alerta alta, 4 medias, 9 bajas y 3 informativas.}
+{fig:dast}
+
+% ============================================================
+% SECRET SCANNING
+% ============================================================
+
+\section{Detección de secretos (Secret Scanning)}
+
+\subsection{Herramienta seleccionada}
+
+Se utilizaron dos herramientas complementarias:
+
+\begin{itemize}
+    \item \textbf{Gitleaks:} escanea el historial completo de Git en busca
+    de credenciales, claves de API y tokens mediante reglas y expresiones
+    regulares. Es rápida y no necesita cuenta.
+    \item \textbf{TruffleHog:} escanea los archivos del sistema de archivos
+    y, cuando es posible, verifica contra el proveedor si una credencial
+    sigue activa. Se configuró para reportar resultados
+    \texttt{verified} y \texttt{unknown}.
+\end{itemize}
+
+El secreto más sensible del proyecto es la contraseña de PostgreSQL
+(\texttt{pg\_password.txt}). Ambas herramientas permiten comprobar que no
+se haya versionado por error.
+
+\subsection{Configuración e integración}
+
+{\sloppy
+Ambos escaneos se ejecutan en contenedores Docker mediante
+\texttt{run-gitleaks.sh} y \texttt{run-truffleHog.sh}. Gitleaks usa el
+comando \texttt{detect} sobre todo el repositorio y TruffleHog el comando
+\texttt{filesystem}, excluyendo \texttt{.git}, \texttt{reports} y
+\texttt{node\_modules} mediante \texttt{trufflehog-exclude.txt}. En GitHub
+Actions, los jobs \texttt{gitleaks-scan} y \texttt{trufflehog-scan} se
+ejecutan con el historial completo (\texttt{fetch-depth: 0}) y publican sus
+reportes como \textit{artifacts}.
+\par}
+
+\subsection{Resultados obtenidos}
+
+\textbf{Ninguna de las dos herramientas encontró secretos.} Gitleaks informó
+``no leaks found'' y devolvió un reporte JSON vacío; el reporte de
+TruffleHog también quedó vacío. Esto es coherente con los controles del
+proyecto: \texttt{pg\_password.txt} está en \texttt{.gitignore} y la
+contraseña se entrega como \textit{Docker secret}, fuera de las imágenes. Por
+ello no hay valores de credenciales que ocultar en esta sección.
+
+% ============================================================
+% SCA
+% ============================================================
+
+\section{Análisis de composición de software (SCA)}
+
+\subsection{Herramienta seleccionada}
+
+Se utilizó \textbf{Trivy}, que analiza dependencias a partir de los archivos
+de bloqueo (\textit{lockfiles}) y compara cada versión con bases de datos de
+vulnerabilidades conocidas. Se eligió por no requerir cuenta ni enviar los
+manifiestos a un servicio externo, y porque con el mismo binario puede
+ampliarse a imágenes de contenedor y configuración.
+
+\subsection{Configuración e integración}
+
+El script \texttt{scripts/security/run-trivy-fs.sh} ejecuta \texttt{trivy fs}
+sobre el repositorio, con el escáner de vulnerabilidades
+(\texttt{-{}-scanners vuln}) y filtrando por severidad alta y crítica. Analiza
+los \texttt{package-lock.json} de \texttt{backend} y \texttt{frontend}. El job
+\texttt{trivy-scan} del pipeline verifica antes que exista el archivo de
+bloqueo, porque sin él Trivy no detecta las dependencias, y publica el
+reporte JSON como \textit{artifact}.
+
+\subsection{Resultados obtenidos}
+
+Trivy encontró \textbf{una vulnerabilidad de severidad alta} en las
+dependencias del backend:
+
+\begin{table}[H]
+\centering
+\caption{Vulnerabilidad detectada por Trivy.}
+\label{tab:trivy}
+
+\begin{tabularx}{\textwidth}{l l l l l X}
+\toprule
+\textbf{CVE} &
+\textbf{Paquete} &
+\textbf{Instalada} &
+\textbf{Corregida en} &
+\textbf{Severidad} &
+\textbf{Ubicación} \\
+\midrule
+CVE-2026-111181 & \texttt{body-parser} & 1.20.8 & 1.20.9 y 2.4.0 &
+Alta & Backend (lockfile) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El título del aviso es \textit{Denial of Service via unhandled decompression
+stream error}. \texttt{body-parser} es una dependencia de Express que
+procesa el cuerpo de las peticiones, por lo que la vulnerabilidad afecta
+directamente a la API. El \texttt{package-lock.json} del frontend no presentó
+vulnerabilidades altas ni críticas. El problema se corrige actualizando
+\texttt{body-parser} a la versión 1.20.9.
+
+% ============================================================
+% COMPARACIÓN
+% ============================================================
+
+\section{Resumen comparativo de herramientas}
+
+\begin{table}[H]
+\centering
+\caption{Resumen de herramientas de seguridad.}
+\label{tab:herramientas}
+
+\begin{tabularx}{\textwidth}{l l X X}
+\toprule
+\textbf{Categoría} &
+\textbf{Herramienta} &
+\textbf{Objetivo} &
+\textbf{Integración} \\
+\midrule
+SAST & Semgrep &
+Patrones inseguros en código y configuración. 15 hallazgos, todos en el
+pipeline. &
+Job \texttt{semgrep-scan} en GitHub Actions \\
+
+DAST & OWASP ZAP (baseline) &
+Cabeceras, CORS y errores en la aplicación en ejecución. 13 alertas en la
+web y 17 en la API. &
+Local, con \texttt{run-zap-baseline.sh}; aún no está en el pipeline \\
+
+Secret Scanning & Gitleaks y TruffleHog &
+Credenciales en el historial y en los archivos. Sin hallazgos. &
+Jobs \texttt{gitleaks-scan} y \texttt{trufflehog-scan} \\
+
+SCA & Trivy &
+Vulnerabilidades en dependencias npm. 1 hallazgo alto (\texttt{body-parser}). &
+Job \texttt{trivy-scan} \\
+\bottomrule
+\end{tabularx}
+\end{table}
