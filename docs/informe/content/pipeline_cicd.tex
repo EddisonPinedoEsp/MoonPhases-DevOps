@@ -1,0 +1,97 @@
+
+\chapter{Implementación del pipeline CI/CD}
+
+\section{Plataforma utilizada}
+
+\campo{
+Indicar la plataforma utilizada (GitLab, GitHub Actions,
+Azure DevOps u otra) y justificar su elección.
+}
+
+\section{Arquitectura del pipeline}
+
+\campo{
+Describir el flujo de integración y entrega continua,
+identificando sus etapas y dependencias.
+}
+
+\evidencefigure
+{figures/pipeline.pdf}
+{Diagrama general del pipeline CI/CD.}
+{fig:pipeline}
+
+\section{Etapas del pipeline}
+
+\begin{table}[H]
+\centering
+\caption{Etapas y trabajos del pipeline.}
+\label{tab:stages}
+
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Etapa} &
+\textbf{Job} &
+\textbf{Descripción} \\
+\midrule
+\campo{Stage 1} & \campo{Job} & \campo{Descripción} \\
+\campo{Stage 2} & \campo{Job} & \campo{Descripción} \\
+\campo{Stage 3} & \campo{Job} & \campo{Descripción} \\
+\campo{Stage 4} & \campo{Job} & \campo{Descripción} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Configuración del pipeline}
+
+\campo{
+Presentar el archivo de configuración y explicar los elementos
+más relevantes de su implementación.
+}
+
+\subsection{Fragmentos de configuración}
+
+\begin{lstlisting}[
+    language=yaml,
+    caption={Ejemplo de estructura del pipeline.},
+    label={lst:pipeline}
+]
+# Sustituir por fragmentos del pipeline real
+
+stages:
+  - build
+  - test
+  - security
+  - deploy
+
+# Agregar aqui los jobs implementados
+\end{lstlisting}
+
+\section{Evidencia de ejecución}
+
+\campo{
+Incluir capturas del pipeline ejecutado, estados de los jobs
+y generación de artefactos.
+}
+
+\evidencefigure
+{evidence/pipeline/ejecucion.png}
+{Ejecución del pipeline CI/CD.}
+{fig:pipeline-ejecucion}
+
+\section{Repositorio y estructura base}
+
+\begin{itemize}
+    \item \textbf{Repositorio del proyecto:}
+
+    \externallink{https://github.com/USUARIO/REPOSITORIO}
+    {Enlace al repositorio}
+
+    \item \textbf{Estructura base del pipeline:}
+
+    \externallink{https://gitlab.com/-/snippets/5999866}
+    {Plantilla de jobs DevSecOps}
+
+    \item \textbf{Archivo de configuración:}
+
+    \campo{Ruta del archivo .gitlab-ci.yml o equivalente.}
+\end{itemize}

@@ -1,7 +1,9 @@
-FROM node:20-alpine
+ARG NODE_IMAGE=node:20-alpine
+FROM ${NODE_IMAGE}
 
 WORKDIR /app
-ENV NODE_ENV=production
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
 COPY package*.json ./
 RUN npm ci --omit=dev && npm cache clean --force
@@ -9,7 +11,8 @@ RUN npm ci --omit=dev && npm cache clean --force
 COPY --chown=node:node src ./src
 
 USER node
-EXPOSE 3001
+ARG BACKEND_CONTAINER_PORT=3001
+EXPOSE ${BACKEND_CONTAINER_PORT}
 
 HEALTHCHECK --interval=15s --timeout=5s --retries=3 \
   CMD wget -qO- http://localhost:3001/api/health || exit 1

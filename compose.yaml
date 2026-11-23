@@ -1,11 +1,13 @@
+# Los valores se leen de variables de entorno (en GitHub Actions: vars.*).
+# Los defaults tras ":-" permiten levantar el proyecto en local sin configurar nada.
 services:
   postgres:
-    image: postgres:16.3-alpine
-    restart: unless-stopped
+    image: ${POSTGRES_IMAGE:-postgres:16.3-alpine}
+    restart: ${RESTART_POLICY:-unless-stopped}
     environment:
-      - POSTGRES_USER=moonuser
-      - POSTGRES_DB=moonphases_db
-      - POSTGRES_PASSWORD_FILE=/run/secrets/pg_password
+      - POSTGRES_USER=${POSTGRES_USER:-moonuser}
+      - POSTGRES_DB=${POSTGRES_DB:-moonphases_db}
+      - POSTGRES_PASSWORD_FILE=${POSTGRES_PASSWORD_FILE:-/run/secrets/pg_password}
     secrets:
       - pg_password
     volumes:
@@ -14,24 +16,29 @@ services:
     networks:
       - private
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U moonuser -d moonphases_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-moonuser} -d ${POSTGRES_DB:-moonphases_db}"]
+      interval: ${POSTGRES_HEALTH_INTERVAL:-5s}
+      timeout: ${POSTGRES_HEALTH_TIMEOUT:-5s}
+      retries: ${POSTGRES_HEALTH_RETRIES:-5}
 
   backend:
-    build: ./backend
-    image: moonphases-backend:1.0.0
-    restart: unless-stopped
+    build:
+      context: ./backend
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:20-alpine}
+        NODE_ENV: ${NODE_ENV:-production}
+        BACKEND_CONTAINER_PORT: ${BACKEND_CONTAINER_PORT:-3001}
+    image: ${BACKEND_IMAGE:-moonphases-backend:1.0.0}
+    restart: ${RESTART_POLICY:-unless-stopped}
     ports:
-      - "3001:3001"
+      - "${BACKEND_HOST_PORT:-3001}:${BACKEND_CONTAINER_PORT:-3001}"
     environment:
-      - PORT=3001
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_USER=moonuser
-      - DB_NAME=moonphases_db
-      - DB_PASSWORD_FILE=/run/secrets/pg_password
+      - PORT=${BACKEND_CONTAINER_PORT:-3001}
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER:-moonuser}
+      - DB_NAME=${DB_NAME:-moonphases_db}
+      - DB_PASSWORD_FILE=${DB_PASSWORD_FILE:-/run/secrets/pg_password}
     secrets:
       - pg_password
     networks:
@@ -40,13 +47,23 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${BACKEND_CONTAINER_PORT:-3001}/api/health || exit 1"]
+      interval: ${BACKEND_HEALTH_INTERVAL:-15s}
+      timeout: ${BACKEND_HEALTH_TIMEOUT:-5s}
+      retries: ${BACKEND_HEALTH_RETRIES:-3}
 
   frontend:
-    build: ./frontend
-    image: moonphases-frontend:1.0.0
-    restart: unless-stopped
+    build:
+      context: ./frontend
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:20-alpine}
+        NGINX_IMAGE: ${NGINX_IMAGE:-nginxinc/nginx-unprivileged:alpine}
+        FRONTEND_CONTAINER_PORT: ${FRONTEND_CONTAINER_PORT:-8081}
+    image: ${FRONTEND_IMAGE:-moonphases-frontend:1.0.0}
+    restart: ${RESTART_POLICY:-unless-stopped}
     ports:
-      - "8081:8081"
+      - "${FRONTEND_HOST_PORT:-8081}:${FRONTEND_CONTAINER_PORT:-8081}"
     networks:
       - public
     depends_on:
@@ -54,7 +71,7 @@ services:
 
 secrets:
   pg_password:
-    file: ./pg_password.txt
+    file: ${PG_PASSWORD_FILE:-./pg_password.txt}
 
 volumes:
   postgres-data:

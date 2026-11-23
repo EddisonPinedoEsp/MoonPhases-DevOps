@@ -1,0 +1,15 @@
+\chapter{Justificación del proyecto}
+
+\section{Justificación de la elección del tema}
+
+\subsection{Contexto del proyecto}
+El curso requería tomar un proyecto de software existente y aplicarle control de versiones, pruebas unitarias y contenerización. Elegimos \emph{MoonPhases} porque se trataba de una aplicación funcional compuesta únicamente por un frontend, lo que nos permitía incorporar un backend y una base de datos sin modificar su propósito original. Esta ampliación, además, generaba tareas independientes que podían distribuirse entre los tres integrantes.
+
+En lugar de realizar un fork, creamos un repositorio nuevo, importamos el código original y lo tradujimos al español. De este modo, el historial de commits registra únicamente el trabajo del equipo desde su primer commit.
+
+\subsection{Motivación y relevancia}
+Aplicar estas prácticas sobre un proyecto real, con múltiples integrantes trabajando en paralelo sobre distintos módulos (base de datos, backend, frontend, infraestructura), permite experimentar directamente los problemas que las prácticas de DevOps buscan resolver.
+
+Al trabajar tres integrantes sobre componentes distintos (base de datos, backend, frontend e infraestructura), era necesario un procedimiento que evitara conflictos entre los cambios de cada uno. Por ello, cada componente se desarrolló en una rama propia y se integró a \texttt{main} mediante un pull request.
+
+Esta organización facilitó el trabajo posterior. Por ejemplo, la dockerización del backend no requirió modificar su lógica, ya que la conexión a la base de datos se configuraba mediante variables de entorno; bastó con reemplazar el host por el nombre del servicio definido en Docker Compose. Del mismo modo, el endpoint \texttt{/api/health}, creado durante el desarrollo del backend, se reutilizó para el healthcheck del contenedor.

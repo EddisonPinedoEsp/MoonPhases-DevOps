@@ -1,0 +1,13 @@
+\chapter{Conclusiones preliminares}
+
+\section{Trazabilidad con Git}
+Adoptar Conventional Commits junto con una estrategia de \emph{branching} tipo Gitflow permitió que tres personas trabajaran en paralelo sobre capas distintas del sistema (base de datos, backend, frontend e infraestructura) sin que \texttt{main} dejara de ser, en todo momento, una versión estable del proyecto. Cada \emph{pull request} documenta con precisión qué módulo cambió y por qué, y el prefijo del mensaje de commit (\texttt{feat}, \texttt{chore}, \texttt{docs}, \texttt{refactor}) hace posible reconstruir la historia de una funcionalidad --- por ejemplo, todo lo relacionado con el esquema de \texttt{moon\_notes} --- sin necesidad de leer el código completo. Esta disciplina es lo que hace escalable el trabajo en equipo: cuanto más crece el número de colaboradores y de módulos, más se depende de que el historial de Git, y no la memoria de las personas, sea la fuente de verdad sobre qué cambió y cuándo.
+
+\section{Calidad y mantenibilidad}
+Las pruebas unitarias permiten verificar de forma reproducible la lógica
+astronómica y detectar regresiones antes de integrar nuevos cambios. Al
+automatizar su ejecución con Vitest, el equipo dispone de una comprobación
+rápida y documentada que facilita el mantenimiento del código.
+
+\section{Ventajas de Docker}
+Dockerizar cada servicio --- frontend, backend y base de datos --- eliminó la dependencia de que cada integrante instalara y configurara manualmente Node.js, Nginx o PostgreSQL en su máquina: el mismo \texttt{docker compose up --build} produce un entorno idéntico en cualquier computadora. La separación en tres imágenes independientes, comunicadas mediante redes \texttt{public}/\texttt{private} y con la base de datos aislada de acceso externo, además de \emph{secrets} para credenciales y un \emph{build} de dos etapas para el frontend, se traduce en contenedores más pequeños, con menor superficie de ataque y más cercanos a cómo se desplegaría el sistema en un entorno productivo real. En conjunto, esto reduce el tiempo de \emph{onboarding} del equipo y hace que el estado ``funciona en Docker'' sea equivalente a ``funciona para cualquiera que lo levante''.

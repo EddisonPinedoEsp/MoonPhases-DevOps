@@ -1,0 +1,406 @@
+\documentclass[11pt,a4paper,oneside]{report}
+
+% ============================================================
+% 1. CONFIGURACIÓN GENERAL
+% ============================================================
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+
+\usepackage[expansion=false]{microtype}
+
+\usepackage[
+    top=2.7cm,
+    bottom=2.5cm,
+    left=3cm,
+    right=2.5cm
+]{geometry}
+
+% ============================================================
+% 2. MATEMÁTICAS, FIGURAS Y TABLAS
+% ============================================================
+
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage[table]{xcolor}
+
+% ============================================================
+% 3. DIAGRAMAS
+% ============================================================
+
+\usepackage{tikz}
+
+\usetikzlibrary{
+    positioning,
+    arrows.meta,
+    shapes.geometric,
+    shapes.misc,
+    fit,
+    backgrounds,
+    calc
+}
+
+% ============================================================
+% 4. CÓDIGO FUENTE
+% ============================================================
+
+\usepackage{listings}
+
+\definecolor{codebackground}{RGB}{245,247,250}
+\definecolor{codekeyword}{RGB}{35,75,135}
+\definecolor{codestring}{RGB}{30,125,90}
+\definecolor{codecomment}{RGB}{110,120,130}
+\definecolor{codeborder}{RGB}{215,220,228}
+
+\lstdefinestyle{codestyle}{
+    backgroundcolor=\color{codebackground},
+    basicstyle=\ttfamily\footnotesize,
+    keywordstyle=\color{codekeyword}\bfseries,
+    stringstyle=\color{codestring},
+    commentstyle=\color{codecomment}\itshape,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    stepnumber=1,
+    numbersep=10pt,
+    breaklines=true,
+    breakatwhitespace=false,
+    showstringspaces=false,
+    frame=single,
+    rulecolor=\color{codeborder},
+    tabsize=4,
+    captionpos=b,
+    keepspaces=true,
+    columns=fullflexible,
+    literate=
+        {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+        {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+        {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1 {Ü}{{\"U}}1
+        {¿}{{?`}}1 {¡}{{!`}}1
+}
+
+\lstdefinelanguage{yaml}{
+    keywords={true,false,null,yes,no,on,off},
+    sensitive=true,
+    comment=[l]{\#},
+    morestring=[b]',
+    morestring=[b]"
+}
+
+\lstset{style=codestyle}
+
+% ============================================================
+% 5. COLORES DEL DOCUMENTO
+% ============================================================
+
+\definecolor{reportblue}{RGB}{25,55,90}
+\definecolor{reportdark}{RGB}{35,45,58}
+\definecolor{reportgray}{RGB}{105,115,125}
+\definecolor{reportlight}{RGB}{240,243,247}
+\definecolor{reportcyan}{RGB}{35,150,175}
+\definecolor{reportred}{RGB}{180,55,55}
+\definecolor{reportorange}{RGB}{210,135,35}
+\definecolor{reportgreen}{RGB}{50,130,90}
+
+% Colores utilizados por los diagramas y tablas de la primera parte.
+\definecolor{gitfeat}{RGB}{35,130,85}
+\definecolor{gitfix}{RGB}{180,55,55}
+\definecolor{gitdocs}{RGB}{35,120,175}
+\definecolor{gitchore}{RGB}{130,95,35}
+\definecolor{gitrefactor}{RGB}{115,75,155}
+\definecolor{gitmerge}{RGB}{210,135,35}
+\definecolor{reportbg}{RGB}{240,243,247}
+\definecolor{dockvolume}{RGB}{35,150,175}
+\definecolor{netpublic}{RGB}{35,120,175}
+\definecolor{netprivate}{RGB}{180,55,55}
+
+% ============================================================
+% 6. FORMATO DE TÍTULOS
+% ============================================================
+
+\usepackage{titlesec}
+
+\titleformat{\chapter}[display]
+    {\normalfont\bfseries\color{reportblue}}
+    {\filleft\Large\thechapter}
+    {1ex}
+    {\titlerule\vspace{1ex}\LARGE}
+    [\vspace{1ex}\titlerule]
+
+\titleformat{\section}
+    {\normalfont\large\bfseries\color{reportblue}}
+    {\thesection}
+    {0.8em}
+    {}
+
+\titleformat{\subsection}
+    {\normalfont\normalsize\bfseries\color{reportdark}}
+    {\thesubsection}
+    {0.8em}
+    {}
+
+\titleformat{\subsubsection}
+    {\normalfont\normalsize\bfseries\color{reportdark}}
+    {\thesubsubsection}
+    {0.8em}
+    {}
+
+\titlespacing*{\chapter}{0pt}{-15pt}{25pt}
+\titlespacing*{\section}{0pt}{16pt}{7pt}
+\titlespacing*{\subsection}{0pt}{12pt}{5pt}
+
+% ============================================================
+% 7. ENCABEZADOS Y PIES DE PÁGINA
+% ============================================================
+
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+\fancyhf{}
+
+\fancyhead[L]{\small\color{reportgray} Informe}
+\fancyhead[R]{\small\color{reportgray} DevOps / DevSecOps}
+
+\fancyfoot[L]{\small\color{reportgray} Universidad de Ingeniería y Tecnología}
+\fancyfoot[R]{\small\color{reportblue}\thepage}
+
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[L]{\small\color{reportgray} Universidad de Ingeniería y Tecnología}
+    \fancyfoot[R]{\small\color{reportblue}\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+}
+
+% ============================================================
+% 8. HIPERVÍNCULOS
+% ============================================================
+
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=reportblue,
+    citecolor=reportblue,
+    urlcolor=reportcyan,
+    pdftitle={Informe Final del Proyecto DevOps},
+    pdfauthor={Equipo de desarrollo},
+    pdfsubject={Implementación de DevOps y DevSecOps},
+    pdfkeywords={DevOps, DevSecOps, STRIDE, CI/CD, SAST, DAST}
+}
+
+% ============================================================
+% 9. LISTAS
+% ============================================================
+
+\usepackage{enumitem}
+
+\setlist[itemize]{
+    leftmargin=1.5cm,
+    itemsep=3pt,
+    topsep=5pt
+}
+
+\setlist[enumerate]{
+    leftmargin=1.5cm,
+    itemsep=3pt,
+    topsep=5pt
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+% ============================================================
+% 10. CAJAS
+% ============================================================
+
+\usepackage[most]{tcolorbox}
+
+\newtcolorbox{infobox}{
+    colback=reportlight,
+    colframe=reportblue,
+    boxrule=0.5pt,
+    arc=2mm,
+    left=3mm,
+    right=3mm,
+    top=2mm,
+    bottom=2mm
+}
+
+\newtcolorbox{warningbox}{
+    colback=orange!5,
+    colframe=reportorange,
+    boxrule=0.5pt,
+    arc=2mm,
+    left=3mm,
+    right=3mm,
+    top=2mm,
+    bottom=2mm
+}
+
+\newtcolorbox{notebox}{
+    colback=reportlight,
+    colframe=reportcyan,
+    boxrule=0.5pt,
+    arc=2mm,
+    left=3mm,
+    right=3mm,
+    top=2mm,
+    bottom=2mm
+}
+
+% ============================================================
+% 11. COMANDOS PERSONALIZADOS
+% ============================================================
+
+\newcommand{\pendiente}[1]{
+    \textcolor{reportred}{\textbf{[PENDIENTE: #1]}}
+}
+
+\newcommand{\campo}[1]{
+    \textcolor{reportgray}{\textit{#1}}
+}
+
+\newcommand{\evidencefigure}[3]{
+    \begin{figure}[H]
+        \centering
+
+        \IfFileExists{#1}{
+            \includegraphics[
+                width=0.95\linewidth,
+                height=0.55\textheight,
+                keepaspectratio
+            ]{#1}
+        }{
+            \fbox{
+                \parbox[c][5cm][c]{0.85\linewidth}{
+                    \centering
+                    \textbf{Evidencia pendiente}\\[3mm]
+                    \campo{#1}\\[2mm]
+                    \small Insertar figura o captura correspondiente.
+                }
+            }
+        }
+
+        \caption{#2}
+        \label{#3}
+    \end{figure}
+}
+
+\newcommand{\externallink}[2]{
+    \href{#1}{\textcolor{reportcyan}{#2}}
+}
+
+\setcounter{tocdepth}{0}
+% ============================================================
+% 12. INICIO DEL DOCUMENTO
+% ============================================================
+
+\begin{document}
+
+% ------------------------------------------------------------
+% PORTADA
+% ------------------------------------------------------------
+
+\input{portada}
+
+% ------------------------------------------------------------
+% ÍNDICES
+% ------------------------------------------------------------
+
+\pagenumbering{roman}
+
+\tableofcontents
+\clearpage
+
+% ------------------------------------------------------------
+% CONTENIDO PRINCIPAL
+% ------------------------------------------------------------
+
+\pagenumbering{arabic}
+
+% ============================================================
+% CAPÍTULOS
+% ============================================================
+
+% Parte 1
+
+\input{content/descripcion}
+\input{content/justificacion}
+\input{content/git}
+\input{content/pruebas}
+\input{content/automatizacion}
+\input{content/dockerizar}
+\input{content/conclusiones_p1}
+
+% Parte 2
+
+\input{content/amenazas_stride}
+\input{content/herramientas_seguridad}
+\input{content/defectdojo}
+\input{content/hallazgos_mitigaciones}
+\input{content/pipeline_cicd}
+\input{content/resultados}
+\input{content/lecciones_aprendidas}
+\input{content/recomendaciones}
+\input{content/conclusiones_p2}
+
+% ============================================================
+% REFERENCIAS
+% ============================================================
+
+\begin{thebibliography}{99}
+
+\addcontentsline{toc}{chapter}{Referencias}
+
+\bibitem{stride}
+Microsoft.
+\textit{Threat Modeling: STRIDE}.
+\url{https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats}
+
+\bibitem{owasp}
+OWASP Foundation.
+\textit{OWASP Web Security Testing Guide}.
+\url{https://owasp.org/www-project-web-security-testing-guide/}
+
+\bibitem{defectdojo}
+DefectDojo.
+\textit{Official Documentation}.
+\url{https://docs.defectdojo.com/}
+
+\bibitem{gitlab}
+GitLab.
+\textit{CI/CD Documentation}.
+\url{https://docs.gitlab.com/ci/}
+
+\bibitem{gitleaks}
+Gitleaks.
+\textit{Official Documentation}.
+\url{https://github.com/gitleaks/gitleaks}
+
+\bibitem{trivy}
+Aqua Security.
+\textit{Trivy Documentation}.
+\url{https://trivy.dev/}
+
+\end{thebibliography}
+
+% ============================================================
+% ANEXOS
+% ============================================================
+
+\appendix
+
+\input{content/anexos}
+
+\end{document}

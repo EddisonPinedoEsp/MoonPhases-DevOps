@@ -1,0 +1,151 @@
+
+\chapter{Herramientas de seguridad implementadas}
+
+% ============================================================
+% SAST
+% ============================================================
+
+\section{Análisis estático de seguridad (SAST)}
+
+\subsection{Herramienta seleccionada}
+
+\campo{
+Indicar la herramienta utilizada, su justificación y el objetivo
+del análisis estático dentro del proyecto.
+}
+
+\subsection{Configuración e integración}
+
+\campo{
+Explicar cómo se configuró la herramienta y cómo se incorporó
+al pipeline CI/CD.
+}
+
+\subsection{Resultados obtenidos}
+
+\campo{
+Describir los principales resultados, métricas y hallazgos.
+}
+
+\evidencefigure
+{evidence/sast/reporte.png}
+{Evidencia del análisis SAST.}
+{fig:sast}
+
+% ============================================================
+% DAST
+% ============================================================
+
+\section{Análisis dinámico de seguridad (DAST)}
+
+\subsection{Herramienta seleccionada}
+
+\campo{
+Describir la herramienta y justificar su elección.
+}
+
+\subsection{Configuración e integración}
+
+\campo{
+Explicar el entorno evaluado, la configuración del análisis
+y su integración en el pipeline.
+}
+
+\subsection{Resultados obtenidos}
+
+\campo{
+Presentar los resultados del análisis dinámico.
+}
+
+\evidencefigure
+{evidence/dast/reporte.png}
+{Evidencia del análisis DAST.}
+{fig:dast}
+
+% ============================================================
+% SECRET SCANNING
+% ============================================================
+
+\section{Detección de secretos (Secret Scanning)}
+
+\subsection{Herramienta seleccionada}
+
+\campo{
+Describir la herramienta utilizada y los tipos de secretos
+que permite identificar.
+}
+
+\subsection{Configuración e integración}
+
+\campo{
+Explicar las reglas, configuración y ejecución dentro del pipeline.
+}
+
+\subsection{Resultados obtenidos}
+
+\campo{
+Presentar los hallazgos identificados. No incluir valores reales
+de credenciales o tokens.
+}
+
+\evidencefigure
+{evidence/secret-scanning/reporte.png}
+{Evidencia del análisis de Secret Scanning.}
+{fig:secrets}
+
+% ============================================================
+% SCA
+% ============================================================
+
+\section{Análisis de composición de software (SCA)}
+
+\subsection{Herramienta seleccionada}
+
+\campo{
+Describir la herramienta y justificar su elección.
+}
+
+\subsection{Configuración e integración}
+
+\campo{
+Explicar qué dependencias se analizaron y cómo se ejecutó
+el análisis dentro del pipeline.
+}
+
+\subsection{Resultados obtenidos}
+
+\campo{
+Presentar las dependencias vulnerables, identificadores CVE,
+severidades y versiones afectadas.
+}
+
+\evidencefigure
+{evidence/sca/reporte.png}
+{Evidencia del análisis SCA.}
+{fig:sca}
+
+% ============================================================
+% COMPARACIÓN
+% ============================================================
+
+\section{Resumen comparativo de herramientas}
+
+\begin{table}[H]
+\centering
+\caption{Resumen de herramientas de seguridad.}
+\label{tab:herramientas}
+
+\begin{tabularx}{\textwidth}{l l X X}
+\toprule
+\textbf{Categoría} &
+\textbf{Herramienta} &
+\textbf{Objetivo} &
+\textbf{Integración} \\
+\midrule
+SAST & \campo{Herramienta} & \campo{Objetivo} & \campo{Job} \\
+DAST & \campo{Herramienta} & \campo{Objetivo} & \campo{Job} \\
+Secret Scanning & \campo{Herramienta} & \campo{Objetivo} & \campo{Job} \\
+SCA & \campo{Herramienta} & \campo{Objetivo} & \campo{Job} \\
+\bottomrule
+\end{tabularx}
+\end{table}
